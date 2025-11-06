@@ -4,6 +4,22 @@
   <xacro:property name="onrobot_type" value="rg6" />
   <xacro:include filename="$(find onrobot_description)/urdf/inc/rg_common.xacro" />
 
+  <!-- Define the missing macros that are referenced but not defined -->
+  <xacro:macro name="onrobot_base_link" params="prefix">
+    <xacro:onrobot_rg_base_link prefix="${prefix}"/>
+  </xacro:macro>
+
+  <xacro:macro name="finger_joints" params="prefix fingerprefix reflect">
+    <xacro:inner_knuckle_joint prefix="${prefix}" fingerprefix="${fingerprefix}" reflect="${reflect}"/>
+    <xacro:inner_finger_joint prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+  </xacro:macro>
+
+  <xacro:macro name="finger_links" params="prefix fingerprefix">
+    <xacro:onrobot_rg_outer_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:onrobot_rg_inner_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:onrobot_rg_inner_finger prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+  </xacro:macro>
+
   <xacro:macro name="inner_knuckle_joint" params="prefix fingerprefix reflect">
     <joint name="${prefix}${fingerprefix}_inner_knuckle_joint" type="revolute">
       <origin xyz="0 ${reflect * -0.012720} 0.159500" rpy="0 0 ${(reflect - 1) * pi / 2}" />
@@ -72,6 +88,20 @@
     <parent link="${prefix}onrobot_base_link" />
     <child link="${prefix}gripper_tcp" />
   </joint>
+
+  <!-- Transmission macro -->
+  <xacro:macro name="transmission_macro" params="prefix joint_name">
+    <transmission name="${prefix}${joint_name}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}${joint_name}">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}${joint_name}_motor">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
 
   <xacro:macro name="onrobot_rg6" params="prefix">
     <xacro:onrobot_base_link prefix="${prefix}" />
