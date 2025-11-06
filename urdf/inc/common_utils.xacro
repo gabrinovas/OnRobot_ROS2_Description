@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Gazebo plugin macro (for ros2_control simulation) -->
+  <xacro:macro name="gazebo_plugin" params="prefix">
+    <gazebo>
+      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+        <!-- Add additional parameters as needed -->
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+  
+  <!-- Simple transmission macro for a joint -->
+  <xacro:macro name="transmission_macro" params="prefix joint_name">
+    <transmission name="${prefix}${joint_name}_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}${joint_name}">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}${joint_name}_motor">
+        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+  </xacro:macro>
+</robot>

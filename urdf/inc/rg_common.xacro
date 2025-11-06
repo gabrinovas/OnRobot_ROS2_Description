@@ -1,7 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="onrobot_base_link" params="prefix">
+  <!-- Include common utilities -->
+  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
+
+  <xacro:macro name="onrobot_rg_base_link" params="prefix">
     <xacro:if value="${onrobot_type == 'rg2'}">
       <xacro:property name="mass" value="0.78" />
       <xacro:property name="ixx" value="1.0E-03" />
@@ -52,7 +55,7 @@
     </gazebo>
   </xacro:macro>
 
-  <xacro:macro name="outer_knuckle" params="prefix fingerprefix">
+  <xacro:macro name="onrobot_rg_outer_knuckle" params="prefix fingerprefix">
     <link name="${prefix}${fingerprefix}_outer_knuckle">
       <inertial>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -84,7 +87,7 @@
     </gazebo>
   </xacro:macro>
 
-  <xacro:macro name="inner_knuckle" params="prefix fingerprefix">
+  <xacro:macro name="onrobot_rg_inner_knuckle" params="prefix fingerprefix">
     <link name="${prefix}${fingerprefix}_inner_knuckle">
       <inertial>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -116,7 +119,7 @@
     </gazebo>
   </xacro:macro>
 
-  <xacro:macro name="inner_finger" params="prefix fingerprefix">
+  <xacro:macro name="onrobot_rg_inner_finger" params="prefix fingerprefix">
     <link name="${prefix}${fingerprefix}_inner_finger">
       <inertial>
         <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
@@ -152,37 +155,14 @@
     </gazebo>
   </xacro:macro>
 
-  <xacro:macro name="finger_joints" params="prefix fingerprefix reflect">
-    <xacro:inner_knuckle_joint prefix="${prefix}" fingerprefix="${fingerprefix}" reflect="${reflect}"/>
-    <xacro:inner_finger_joint prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+  <xacro:macro name="onrobot_rg_finger_joints" params="prefix fingerprefix reflect">
+    <xacro:onrobot_rg_inner_knuckle_joint prefix="${prefix}" fingerprefix="${fingerprefix}" reflect="${reflect}"/>
+    <xacro:onrobot_rg_inner_finger_joint prefix="${prefix}" fingerprefix="${fingerprefix}"/>
   </xacro:macro>
 
-  <xacro:macro name="finger_links" params="prefix fingerprefix">
-    <xacro:outer_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}"/>
-    <xacro:inner_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}"/>
-    <xacro:inner_finger prefix="${prefix}" fingerprefix="${fingerprefix}"/>
-  </xacro:macro>
-
-  <!-- Gazebo plugin macro (for ros2_control simulation) -->
-  <xacro:macro name="gazebo_plugin" params="prefix">
-    <gazebo>
-      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-        <!-- Add additional parameters as needed -->
-      </plugin>
-    </gazebo>
-  </xacro:macro>
-  
-  <!-- Simple transmission macro for a joint -->
-  <xacro:macro name="transmission_macro" params="prefix joint_name">
-    <transmission name="${prefix}${joint_name}_trans">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="${prefix}${joint_name}">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-      </joint>
-      <actuator name="${prefix}${joint_name}_motor">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
-      </actuator>
-    </transmission>
+  <xacro:macro name="onrobot_rg_finger_links" params="prefix fingerprefix">
+    <xacro:onrobot_rg_outer_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:onrobot_rg_inner_knuckle prefix="${prefix}" fingerprefix="${fingerprefix}"/>
+    <xacro:onrobot_rg_inner_finger prefix="${prefix}" fingerprefix="${fingerprefix}"/>
   </xacro:macro>
 </robot>

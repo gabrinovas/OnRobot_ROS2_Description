@@ -8,10 +8,11 @@
         prefix:=''
         sim_gazebo:=false
         use_fake_hardware:=false
-        connection_type:=serial
+        connection_type:=tcp
         device:=/tmp/ttyUR
         ip_address:=192.168.1.1
         port:=502
+        device_address:=65
         ">
 
         <xacro:if value="${onrobot_type == 'rg2'}">
@@ -22,11 +23,18 @@
             <xacro:include filename="$(find onrobot_description)/urdf/rg6_macro.xacro"/>
             <xacro:onrobot_rg6 prefix="${prefix}"/>
         </xacro:if>
+        <!-- 2FG7 and 2FG14 Support -->
+        <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+            <xacro:include filename="$(find onrobot_description)/urdf/2fg7_macro.xacro"/>
+            <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
+        </xacro:if>
 
         <!-- Enable the gazebo plugin for simulation -->
         <xacro:if value="${sim_gazebo}">
             <gazebo>
-                <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control"/>
+                <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+                    <parameters>$(find onrobot_description)/config/onrobot_controllers.yaml</parameters>
+                </plugin>
             </gazebo>
         </xacro:if>
 
@@ -35,23 +43,35 @@
             <hardware>
                 <xacro:if value="${sim_gazebo}">
                     <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+                    <param name="use_sim_time">true</param>
                 </xacro:if>
                 <xacro:if value="${use_fake_hardware}">
-                    <plugin>test_hardware_components/TestSingleJointActuator</plugin>
+                    <plugin>fake_components/GenericSystem</plugin>
+                    <param name="state_following_offset">0.0</param>
                 </xacro:if>
                 <xacro:unless value="${sim_gazebo or use_fake_hardware}">
-                    <plugin>onrobot_driver/RGHardwareInterface</plugin>
+                    <!-- Select appropriate hardware interface based on gripper type -->
+                    <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+                        <plugin>onrobot_driver/FGHardwareInterface</plugin>
+                    </xacro:if>
+                    <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+                        <plugin>onrobot_driver/RGHardwareInterface</plugin>
+                    </xacro:if>
                     <param name="onrobot_type">${onrobot_type}</param>
                     <param name="prefix">${prefix}</param>
                     <param name="connection_type">${connection_type}</param>
                     <param name="device">${device}</param>
                     <param name="ip_address">${ip_address}</param>
                     <param name="port">${port}</param>
+                    <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+                        <param name="device_address">${device_address}</param>
+                    </xacro:if>
                 </xacro:unless>
             </hardware>
             <joint name="${prefix}finger_width">
                 <command_interface name="position"/>
                 <state_interface name="position"/>
+                <state_interface name="velocity"/>
             </joint>
         </ros2_control>
 
