@@ -39,19 +39,10 @@
         </xacro:if>
 
         <!-- Define the OnRobot gripper hardware interface for ROS 2 control -->
-        <ros2_control name="OnRobotGripper" type="actuator">
-            <hardware>
-                <xacro:if value="${sim_gazebo}">
-                    <plugin>gazebo_ros2_control/GazeboSystem</plugin>
-                    <param name="use_sim_time">true</param>
-                </xacro:if>
-                <xacro:if value="${use_fake_hardware}">
-                    <!-- Use the correct fake hardware plugin for ROS 2 Humble -->
-                    <plugin>mock_components/GenericSystem</plugin>
-                    <param name="fake_sensor_commands">true</param>
-                    <param name="state_following_offset">0.0</param>
-                </xacro:if>
-                <xacro:unless value="${sim_gazebo or use_fake_hardware}">
+        <!-- For fake hardware, the UR macro handles everything, so we only define real hardware here -->
+        <xacro:unless value="${use_fake_hardware}">
+            <ros2_control name="OnRobotGripper" type="actuator">
+                <hardware>
                     <!-- Select appropriate hardware interface based on gripper type -->
                     <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
                         <plugin>onrobot_driver/FGHardwareInterface</plugin>
@@ -68,14 +59,14 @@
                     <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
                         <param name="device_address">${device_address}</param>
                     </xacro:if>
-                </xacro:unless>
-            </hardware>
-            <joint name="${prefix}finger_width">
-                <command_interface name="position"/>
-                <state_interface name="position"/>
-                <state_interface name="velocity"/>
-            </joint>
-        </ros2_control>
+                </hardware>
+                <joint name="${prefix}finger_width">
+                    <command_interface name="position"/>
+                    <state_interface name="position"/>
+                    <state_interface name="velocity"/>
+                </joint>
+            </ros2_control>
+        </xacro:unless>
 
     </xacro:macro>
 </robot>
