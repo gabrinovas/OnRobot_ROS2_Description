@@ -6,7 +6,7 @@
 
   <xacro:macro name="onrobot_2fg7" params="prefix onrobot_type:='2fg7'">
     
-    <!-- Base Link - CORRECTED SCALING -->
+    <!-- Base Link -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -28,7 +28,7 @@
       </collision>
     </link>
 
-    <!-- Finger Links - CORRECTED SCALING -->
+    <!-- Finger Links -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -83,9 +83,9 @@
       <limit lower="0" upper="0.07" velocity="0.45" effort="140"/>
     </joint>
 
-    <!-- Left Finger Joint -->
+    <!-- Left Finger Joint - FIXED ORIGIN -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
-      <origin xyz="0.0225 0 0.05" rpy="0 0 0"/>
+      <origin xyz="0.0225 0 0.02" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
@@ -93,9 +93,9 @@
       <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
     </joint>
 
-    <!-- Right Finger Joint -->
+    <!-- Right Finger Joint - FIXED ORIGIN -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
-      <origin xyz="-0.0225 0 0.05" rpy="0 0 0"/>
+      <origin xyz="-0.0225 0 0.02" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
@@ -106,7 +106,7 @@
     <!-- TCP Link -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
-      <origin xyz="0 0 0.08" rpy="0 0 0"/>
+      <origin xyz="0 0 0.06" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
     </joint>
