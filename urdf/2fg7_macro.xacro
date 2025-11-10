@@ -18,7 +18,7 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/2fg7/visual/base_link.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="silver"/>
+        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -40,7 +40,7 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/2fg7/visual/left_finger_link.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="silver"/>
+        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -61,7 +61,7 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/2fg7/visual/right_finger_link.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="silver"/>
+        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
