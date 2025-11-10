@@ -38,6 +38,9 @@ def launch_setup(context, *args, **kwargs):
             " ",
             "name:=",
             "onrobot",
+            " ",
+            "use_fake_hardware:=true",  # For visualization only
+            " ",
         ]
     )
     robot_description = {

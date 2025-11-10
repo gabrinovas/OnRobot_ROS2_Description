@@ -74,7 +74,7 @@
     <!-- Dummy link for the main control joint -->
     <link name="${prefix}finger_width_mock_link"/>
     
-    <!-- Main control joint (finger_width) - CORRECT RANGE: 0 to 0.07m (70mm) -->
+    <!-- Main control joint (finger_width) -->
     <joint name="${prefix}finger_width" type="prismatic">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
@@ -83,7 +83,7 @@
       <limit lower="0" upper="0.035" velocity="0.45" effort="140"/>
     </joint>
 
-    <!-- Left Finger Joint - MODIFIED: Positioned to start close to center -->
+    <!-- Left Finger Joint -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
       <origin xyz="-0.0225 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
@@ -93,7 +93,7 @@
       <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
     </joint>
 
-    <!-- Right Finger Joint - MODIFIED: Positioned to start close to center -->
+    <!-- Right Finger Joint -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
       <origin xyz="0.0225 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
