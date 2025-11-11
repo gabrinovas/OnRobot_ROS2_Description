@@ -45,7 +45,7 @@
                 <hardware>
                     <!-- Select appropriate hardware interface based on gripper type -->
                     <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
-                        <plugin>onrobot_driver/FGHardwareInterface</plugin>
+                        <plugin>onrobot_driver::FGHardwareInterface</plugin>
                         <param name="onrobot_type">${onrobot_type}</param>
                         <param name="prefix">${prefix}</param>
                         <param name="connection_type">${connection_type}</param>
