@@ -1,78 +1,90 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
 
-    <!-- Include the macro file for the specific OnRobot model -->
-    <xacro:macro name="onrobot"
-        params="
-        onrobot_type
-        prefix:=''
-        sim_gazebo:=false
-        use_fake_hardware:=false
-        connection_type:=tcp
-        device:=/tmp/ttyUR
-        ip_address:=192.168.1.1
-        port:=502
-        device_address:=65
-        ">
+  <!-- Macro principal para todos los grippers OnRobot -->
+  <xacro:macro name="onrobot"
+    params="
+      onrobot_type
+      prefix:=''
+      sim_gazebo:=false
+      use_fake_hardware:=false
+      connection_type:=tcp
+      device:=/tmp/ttyUR
+      ip_address:=192.168.1.1
+      port:=502
+      device_address:=65
+    ">
 
-        <xacro:if value="${onrobot_type == 'rg2'}">
-            <xacro:include filename="$(find onrobot_description)/urdf/rg2_macro.xacro"/>
-            <xacro:onrobot_rg2 prefix="${prefix}"/>
-        </xacro:if>
-        <xacro:if value="${onrobot_type == 'rg6'}">
-            <xacro:include filename="$(find onrobot_description)/urdf/rg6_macro.xacro"/>
-            <xacro:onrobot_rg6 prefix="${prefix}"/>
-        </xacro:if>
-        <!-- 2FG7 and 2FG14 Support -->
-        <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
-            <xacro:include filename="$(find onrobot_description)/urdf/2fg7_macro.xacro"/>
-            <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
-        </xacro:if>
+    <!-- ====================== RG2 ====================== -->
+    <xacro:if value="${onrobot_type == 'rg2'}">
+      <xacro:include filename="$(find onrobot_description)/urdf/rg2_macro.xacro"/>
+      <xacro:onrobot_rg2 prefix="${prefix}"/>
+    </xacro:if>
 
-        <!-- Enable the gazebo plugin for simulation -->
-        <xacro:if value="${sim_gazebo}">
-            <gazebo>
-                <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-                    <parameters>$(find onrobot_description)/config/onrobot_controllers.yaml</parameters>
-                </plugin>
-            </gazebo>
-        </xacro:if>
+    <!-- ====================== RG6 ====================== -->
+    <xacro:if value="${onrobot_type == 'rg6'}">
+      <xacro:include filename="$(find onrobot_description)/urdf/rg6_macro.xacro"/>
+      <xacro:onrobot_rg6 prefix="${prefix}"/>
+    </xacro:if>
 
-        <!-- Define the OnRobot gripper hardware interface for ROS 2 control -->
-        <!-- For fake hardware, the UR macro handles everything, so we only define real hardware here -->
-        <xacro:unless value="${use_fake_hardware}">
-            <ros2_control name="OnRobotGripper" type="actuator">
-                <hardware>
-                    <!-- Select appropriate hardware interface based on gripper type -->
-                    <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
-                        <plugin>onrobot_driver::FGHardwareInterface</plugin>
-                        <param name="onrobot_type">${onrobot_type}</param>
-                        <param name="prefix">${prefix}</param>
-                        <param name="connection_type">${connection_type}</param>
-                        <param name="device">${device}</param>
-                        <param name="ip_address">${ip_address}</param>
-                        <param name="port">${port}</param>
-                        <param name="device_address">${device_address}</param>
-                        <param name="use_fake_hardware">false</param>
-                    </xacro:if>
-                    <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
-                        <plugin>onrobot_driver/RGHardwareInterface</plugin>
-                        <param name="onrobot_type">${onrobot_type}</param>
-                        <param name="prefix">${prefix}</param>
-                        <param name="connection_type">${connection_type}</param>
-                        <param name="device">${device}</param>
-                        <param name="ip_address">${ip_address}</param>
-                        <param name="port">${port}</param>
-                        <param name="use_fake_hardware">false</param>
-                    </xacro:if>
-                </hardware>
-                <joint name="${prefix}finger_width">
-                    <command_interface name="position"/>
-                    <state_interface name="position"/>
-                    <state_interface name="velocity"/>
-                </joint>
-            </ros2_control>
-        </xacro:unless>
+    <!-- ====================== 2FG7 / 2FG14 ====================== -->
+    <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+      <xacro:include filename="$(find onrobot_description)/urdf/2fg7_macro.xacro"/>
+      <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
+    </xacro:if>
 
-    </xacro:macro>
+    <!-- ====================== 3FG15 (NUEVO) ====================== -->
+    <xacro:if value="${onrobot_type == '3fg15'}">
+      <xacro:include filename="$(find onrobot_description)/urdf/3fg15_macro.xacro"/>
+      <xacro:onrobot_3fg15 prefix="${prefix}"/>
+    </xacro:if>
+
+    <!-- ====================== Gazebo Simulation ====================== -->
+    <xacro:if value="${sim_gazebo}">
+      <gazebo>
+        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+          <parameters>$(find onrobot_description)/config/onrobot_controllers.yaml</parameters>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+
+    <!-- ====================== ROS2 Control ====================== -->
+    <xacro:unless value="${use_fake_hardware}">
+      <ros2_control name="OnRobotGripper" type="actuator">
+        <hardware>
+          <!-- 2FG7, 2FG14 y 3FG15 usan el mismo driver -->
+          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14' or onrobot_type == '3fg15'}">
+            <plugin>onrobot_driver::FGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">false</param>
+          </xacro:if>
+
+          <!-- RG2 / RG6 -->
+          <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+            <plugin>onrobot_driver/RGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="use_fake_hardware">false</param>
+          </xacro:if>
+        </hardware>
+
+        <joint name="${prefix}finger_width">
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+        </joint>
+      </ros2_control>
+    </xacro:unless>
+
+  </xacro:macro>
 </robot>
