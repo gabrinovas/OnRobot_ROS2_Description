@@ -1,18 +1,15 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/2fg7_materials.xacro" />
 
-  <!-- 
-    3FG15: Máxima apertura (117.5 mm), solo rota en RZ
-    100% compatible con ROS 2 Humble (sin cos/sin)
-  -->
-  <xacro:macro name="onrobot_3fg15_max_open_rotatable" params="prefix">
+  <!-- ================================================================= -->
+  <!--  ONROBOT 3FG15 – VERSIÓN FIJA EN MÁXIMA APERTURA + SOLO ROTA EN RZ  -->
+  <!--  100% compatible con ROS 2 Humble (sin cos/sin/eval)               -->
+  <!--  Diámetro máximo fijo: 117.5 mm                                    -->
+  <!-- ================================================================= -->
 
-    <!-- Posiciones precalculadas (máxima apertura) -->
-    <xacro:property name="finger_radius" value="0.05875" /> <!-- 117.5 / 2 -->
+  <xacro:macro name="onrobot_3fg15" params="prefix">
 
-    <!-- Base Link -->
+    <!-- ====================== BASE ====================== -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -34,17 +31,18 @@
       </collision>
     </link>
 
-    <!-- Marco rotativo -->
+    <!-- =============== MARCO QUE ROTA (solo eje Z) =============== -->
     <link name="${prefix}rotating_frame"/>
     <joint name="${prefix}gripper_rotation" type="revolute">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}rotating_frame"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="-3.1416" upper="3.1416" effort="200" velocity="1.0"/>
+      <limit lower="-3.1416" upper="3.1416" effort="200" velocity="2.0"/>
+      <dynamics damping="0.7"/>
     </joint>
 
-    <!-- === DEDO IZQUIERDO === -->
+    <!-- ====================== DEDO IZQUIERDO ====================== -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -68,10 +66,11 @@
     <joint name="${prefix}left_finger_fixed" type="fixed">
       <parent link="${prefix}rotating_frame"/>
       <child link="${prefix}left_finger_link"/>
-      <origin xyz="0.05875 0.0 0" rpy="0 0 1.5708"/> <!-- 90° -->
+      <!-- Máxima apertura: radio = 58.75 mm, ángulo 90° -->
+      <origin xyz="0.05875 0 0" rpy="0 0 1.5708"/>
     </joint>
 
-    <!-- === DEDO DERECHO === -->
+    <!-- ====================== DEDO DERECHO ====================== -->
     <link name="${prefix}right_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -95,10 +94,11 @@
     <joint name="${prefix}right_finger_fixed" type="fixed">
       <parent link="${prefix}rotating_frame"/>
       <child link="${prefix}right_finger_link"/>
-      <origin xyz="-0.029375 -0.050832 0" rpy="0 0 5.23599"/> <!-- 300° -->
+      <!-- 210° → X = -0.029375, Y = -0.050832, rz total = 300° = 5.23599 rad -->
+      <origin xyz="-0.029375 -0.050832 0" rpy="0 0 5.23599"/>
     </joint>
 
-    <!-- === DEDO MEDIO === -->
+    <!-- ====================== DEDO MEDIO ====================== -->
     <link name="${prefix}middle_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -122,10 +122,11 @@
     <joint name="${prefix}middle_finger_fixed" type="fixed">
       <parent link="${prefix}rotating_frame"/>
       <child link="${prefix}middle_finger_link"/>
-      <origin xyz="-0.029375 0.050832 0" rpy="0 0 1.0472"/> <!-- 60° -->
+      <!-- 330° → X = -0.029375, Y = +0.050832, rz total = 60° = 1.0472 rad -->
+      <origin xyz="-0.029375 0.050832 0" rpy="0 0 1.0472"/>
     </joint>
 
-    <!-- TCP -->
+    <!-- ====================== TCP ====================== -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
       <parent link="${prefix}rotating_frame"/>
@@ -133,7 +134,16 @@
       <origin xyz="0 0 0.08" rpy="0 0 0"/>
     </joint>
 
-    <!-- Transmisión -->
-    <xacro:transmission_macro prefix="${prefix}" joint_name="gripper_rotation"/>
+    <!-- ====================== TRANSMISIÓN (para ROS Control) ====================== -->
+    <transmission name="${prefix}gripper_rotation_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="${prefix}gripper_rotation">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="${prefix}gripper_rotation_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
   </xacro:macro>
 </robot>
