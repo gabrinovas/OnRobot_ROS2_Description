@@ -107,7 +107,7 @@
 
     <!-- Left Finger Joint -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
-      <origin xyz="-0.075 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
@@ -117,7 +117,7 @@
 
     <!-- Right Finger Joint -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
-      <origin xyz="0.075 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
