@@ -13,6 +13,7 @@
         ip_address:=192.168.1.1
         port:=502
         device_address:=65
+        auto_detect:=false
         ">
 
         <xacro:if value="${onrobot_type == 'rg2'}">
@@ -63,7 +64,8 @@
                         <param name="ip_address">${ip_address}</param>
                         <param name="port">${port}</param>
                         <param name="device_address">${device_address}</param>
-                        <param name="use_fake_hardware">false</param>
+                        <param name="use_fake_hardware">${use_fake_hardware}</param>
+                        <param name="auto_detect">${auto_detect}</param>
                     </xacro:if>
                     <xacro:if value="${onrobot_type == '3fg15' or onrobot_type == '3fg25'}">
                         <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
@@ -74,7 +76,8 @@
                         <param name="ip_address">${ip_address}</param>
                         <param name="port">${port}</param>
                         <param name="device_address">${device_address}</param>
-                        <param name="use_fake_hardware">false</param>
+                        <param name="use_fake_hardware">${use_fake_hardware}</param>
+                        <param name="auto_detect">${auto_detect}</param>
                     </xacro:if>
                     <xacro:if value="${onrobot_type == 'vg10' or onrobot_type == 'vgc10'}">
                         <plugin>onrobot_driver::VGHardwareInterface</plugin>
@@ -85,7 +88,8 @@
                         <param name="ip_address">${ip_address}</param>
                         <param name="port">${port}</param>
                         <param name="device_address">${device_address}</param>
-                        <param name="use_fake_hardware">false</param>
+                        <param name="use_fake_hardware">${use_fake_hardware}</param>
+                        <param name="auto_detect">${auto_detect}</param>
                     </xacro:if>
                     <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
                         <plugin>onrobot_driver::RGHardwareInterface</plugin>
@@ -95,7 +99,8 @@
                         <param name="device">${device}</param>
                         <param name="ip_address">${ip_address}</param>
                         <param name="port">${port}</param>
-                        <param name="use_fake_hardware">false</param>
+                        <param name="use_fake_hardware">${use_fake_hardware}</param>
+                        <param name="auto_detect">${auto_detect}</param>
                     </xacro:if>
                 </hardware>
                 <xacro:if value="${onrobot_type.startswith('vg')}">
