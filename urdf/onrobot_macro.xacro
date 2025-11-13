@@ -55,7 +55,7 @@
                 <hardware>
                     <!-- Select appropriate hardware interface based on gripper type -->
                     <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
-                        <plugin>onrobot_driver/TwoFGHardwareInterface</plugin>
+                        <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
                         <param name="onrobot_type">${onrobot_type}</param>
                         <param name="prefix">${prefix}</param>
                         <param name="connection_type">${connection_type}</param>
@@ -66,7 +66,7 @@
                         <param name="use_fake_hardware">false</param>
                     </xacro:if>
                     <xacro:if value="${onrobot_type == '3fg15' or onrobot_type == '3fg25'}">
-                        <plugin>onrobot_driver/ThreeFGHardwareInterface</plugin>
+                        <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
                         <param name="onrobot_type">${onrobot_type}</param>
                         <param name="prefix">${prefix}</param>
                         <param name="connection_type">${connection_type}</param>
@@ -77,7 +77,7 @@
                         <param name="use_fake_hardware">false</param>
                     </xacro:if>
                     <xacro:if value="${onrobot_type == 'vg10' or onrobot_type == 'vgc10'}">
-                        <plugin>onrobot_driver/VGHardwareInterface</plugin>
+                        <plugin>onrobot_driver::VGHardwareInterface</plugin>
                         <param name="onrobot_type">${onrobot_type}</param>
                         <param name="prefix">${prefix}</param>
                         <param name="connection_type">${connection_type}</param>
@@ -88,7 +88,7 @@
                         <param name="use_fake_hardware">false</param>
                     </xacro:if>
                     <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
-                        <plugin>onrobot_driver/RGHardwareInterface</plugin>
+                        <plugin>onrobot_driver::RGHardwareInterface</plugin>
                         <param name="onrobot_type">${onrobot_type}</param>
                         <param name="prefix">${prefix}</param>
                         <param name="connection_type">${connection_type}</param>
