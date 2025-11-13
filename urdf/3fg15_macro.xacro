@@ -3,52 +3,49 @@
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
   <xacro:include filename="$(find onrobot_description)/urdf/inc/2fg7_materials.xacro" />
 
-  <!-- ============================================= -->
-  <!-- MACRO: OnRobot 3FG15 (estructura IGUAL a 2FG7) -->
-  <!-- STL COMPLETO → solo base_link con visual     -->
-  <!-- ============================================= -->
+  <!-- Macro for OnRobot 3FG15 gripper -->
   <xacro:macro name="onrobot_3fg15" params="prefix onrobot_type:='3fg15'">
 
-    <!-- ====================== Base Link (STL COMPLETO del 3FG15) ====================== -->
+    <!-- Base Link -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
-        <origin xyz="0 0 0.05" rpy="${-pi/2} 0 0"/>
+        <origin xyz="0 0 0.05" rpy="0 0 0"/>
         <mass value="1.2"/>
         <inertia ixx="0.012" ixy="0.0" ixz="0.0" iyy="0.012" iyz="0.0" izz="0.008"/>
       </inertial>
       <visual>
-        <origin xyz="0 0 0.05" rpy="${-pi/2} 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/3fg15/visual/3fg15.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/3fg15/visual/base.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0.05" rpy="${-pi/2} 0 0"/>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/3fg15/collision/3fg15.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/3fg15/collision/base.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- ====================== Dummy Links para simular movimiento (solo para joint) ====================== -->
-    <!-- No tienen STL → solo para el joint principal (finger_width) -->
+    <!-- Finger Links with proper STL files -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.01"/>
-        <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
       </inertial>
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.001 0.001 0.001"/> <!-- invisible -->
+          <mesh filename="package://onrobot_description/meshes/3fg15/visual/left_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
+        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/3fg15/collision/left_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -56,27 +53,50 @@
     <link name="${prefix}right_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.01"/>
-        <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+        <mass value="0.1"/>
+        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
       </inertial>
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.001 0.001 0.001"/> <!-- invisible -->
+          <mesh filename="package://onrobot_description/meshes/3fg15/visual/right_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
+        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <box size="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/3fg15/collision/right_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- ====================== Dummy link for the main control joint ====================== -->
-    <link name="${prefix}finger_width_mock_link"/>
+    <!-- Middle Finger Link -->
+    <link name="${prefix}middle_finger_link">
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.05"/>
+        <inertia ixx="0.00005" ixy="0.0" ixz="0.0" iyy="0.00005" iyz="0.0" izz="0.00005"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/3fg15/visual/middle_finger.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="onrobot_silver"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/3fg15/collision/middle_finger.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
 
-    <!-- ====================== Main control joint (finger_width) ====================== -->
+    <!-- Dummy link for the main control joint -->
+    <link name="${prefix}finger_width_mock_link"/>
+    
+    <!-- Main control joint (finger_width) -->
     <joint name="${prefix}finger_width" type="prismatic">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
@@ -85,7 +105,7 @@
       <limit lower="0.0" upper="0.15" velocity="0.25" effort="200"/>
     </joint>
 
-    <!-- ====================== Left Finger Joint (mimic) ====================== -->
+    <!-- Left Finger Joint -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
       <origin xyz="-0.075 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
@@ -95,17 +115,24 @@
       <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
     </joint>
 
-    <!-- ====================== Right Finger Joint (mimic) ====================== -->
+    <!-- Right Finger Joint -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
       <origin xyz="0.075 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
-      <limit lower="-0.075" upper="0." effort="200" velocity="0.25"/>
+      <limit lower="-0.075" upper="0.0" effort="200" velocity="0.25"/>
       <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
     </joint>
 
-    <!-- ====================== TCP Link ====================== -->
+    <!-- Middle Finger Joint (fixed for now, can be made movable if needed) -->
+    <joint name="${prefix}middle_finger_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}onrobot_base_link"/>
+      <child link="${prefix}middle_finger_link"/>
+    </joint>
+
+    <!-- TCP Link -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
       <origin xyz="0 0 0.08" rpy="0 0 0"/>
@@ -113,7 +140,7 @@
       <child link="${prefix}gripper_tcp"/>
     </joint>
 
-    <!-- ====================== Transmission for ROS Control (IGUAL QUE 2FG7) ====================== -->
+    <!-- Transmission for ROS Control -->
     <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
 
   </xacro:macro>

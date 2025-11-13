@@ -33,7 +33,7 @@
       <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
     </xacro:if>
 
-    <!-- ====================== 3FG15 (NUEVO) ====================== -->
+    <!-- ====================== 3FG15 ====================== -->
     <xacro:if value="${onrobot_type == '3fg15'}">
       <xacro:include filename="$(find onrobot_description)/urdf/3fg15_macro.xacro"/>
       <xacro:onrobot_3fg15 prefix="${prefix}"/>
@@ -46,6 +46,14 @@
           <parameters>$(find onrobot_description)/config/onrobot_controllers.yaml</parameters>
         </plugin>
       </gazebo>
+      
+      <!-- Include Gazebo-specific plugins for each gripper type -->
+      <xacro:if value="${onrobot_type == '3fg15'}">
+        <xacro:include filename="$(find onrobot_description)/urdf/inc/3fg15_gazebo.xacro"/>
+        <xacro:onrobot_3fg15_grasp_plugin prefix="${prefix}"/>
+        <xacro:onrobot_3fg15_mimic_plugin prefix="${prefix}"/>
+        <xacro:onrobot_3fg15_gazebo_properties prefix="${prefix}"/>
+      </xacro:if>
     </xacro:if>
 
     <!-- ====================== ROS2 Control ====================== -->
