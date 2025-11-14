@@ -43,26 +43,17 @@
     <xacro:if value="${sim_gazebo}">
       <gazebo>
         <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-          <parameters>$(find onrobot_description)/config/onrobot_controllers.yaml</parameters>
         </plugin>
       </gazebo>
-      
-      <!-- Include Gazebo-specific plugins for each gripper type -->
-      <xacro:if value="${onrobot_type == '3fg15'}">
-        <xacro:include filename="$(find onrobot_description)/urdf/inc/3fg15_gazebo.xacro"/>
-        <xacro:onrobot_3fg15_grasp_plugin prefix="${prefix}"/>
-        <xacro:onrobot_3fg15_mimic_plugin prefix="${prefix}"/>
-        <xacro:onrobot_3fg15_gazebo_properties prefix="${prefix}"/>
-      </xacro:if>
     </xacro:if>
 
     <!-- ====================== ROS2 Control ====================== -->
     <xacro:unless value="${use_fake_hardware}">
       <ros2_control name="OnRobotGripper" type="actuator">
         <hardware>
-          <!-- 2FG7, 2FG14 y 3FG15 usan el mismo driver -->
-          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14' or onrobot_type == '3fg15'}">
-            <plugin>onrobot_driver::FGHardwareInterface</plugin>
+          <!-- 2FG7 / 2FG14 use TwoFG hardware interface -->
+          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
             <param name="onrobot_type">${onrobot_type}</param>
             <param name="prefix">${prefix}</param>
             <param name="connection_type">${connection_type}</param>
@@ -73,9 +64,22 @@
             <param name="use_fake_hardware">false</param>
           </xacro:if>
 
-          <!-- RG2 / RG6 -->
+          <!-- 3FG15 uses ThreeFG hardware interface -->
+          <xacro:if value="${onrobot_type == '3fg15'}">
+            <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">false</param>
+          </xacro:if>
+
+          <!-- RG2 / RG6 use RG hardware interface -->
           <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
-            <plugin>onrobot_driver/RGHardwareInterface</plugin>
+            <plugin>onrobot_driver::RGHardwareInterface</plugin>
             <param name="onrobot_type">${onrobot_type}</param>
             <param name="prefix">${prefix}</param>
             <param name="connection_type">${connection_type}</param>
