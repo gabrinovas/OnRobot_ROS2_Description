@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/2fg7_materials.xacro" />
+  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
   <xacro:macro name="onrobot_2fg7" params="prefix onrobot_type:='2fg7'">
     
