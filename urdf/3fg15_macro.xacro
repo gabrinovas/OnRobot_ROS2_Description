@@ -103,7 +103,7 @@
     <link name="${prefix}finger_width_mock_link"/>
     
     <!-- Main control joint (finger_width) - represents aperture diameter -->
-    <joint name="${prefix}finger_width" type="prismatic">
+    <joint name="${prefix}finger_width" type="revolute">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
