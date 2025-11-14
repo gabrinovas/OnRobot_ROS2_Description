@@ -1,0 +1,106 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============================================= -->
+  <!-- Gazebo Vacuum Grasp Plugin para VGC10 / VG10  -->
+  <!-- ============================================= -->
+  <xacro:macro name="onrobot_vgc10_vacuum_plugin" params="prefix num_cups:=4">
+    <gazebo>
+      <plugin name="${prefix}vacuum_grasp_fix" filename="libgazebo_vacuum_grasp.so">
+        <arm>
+          <arm_name>VGC10</arm_name>
+          <palm_link>${prefix}onrobot_base_link</palm_link>
+          <gripper_link>${prefix}suction_cups</gripper_link>
+        </arm>
+
+        <!-- Fuerza mínima para activar succión (N) -->
+        <attach_force>40.0</attach_force>
+        <detach_force>25.0</detach_force>
+
+        <!-- Área efectiva de contacto por ventosa (m²) -->
+        <xacro:property name="single_cup_area" value="0.00078"/> <!-- ~10 cm² -->
+        <xacro:property name="total_area" value="${single_cup_area * num_cups}"/>
+        <contact_area>${total_area}</contact_area>
+
+        <!-- Tolerancia angular (rad) -->
+        <forces_angle_tolerance>1.57</forces_angle_tolerance> <!-- 90° -->
+
+        <!-- Frecuencia de actualización -->
+        <update_rate>200</update_rate>
+
+        <!-- Umbrales de contacto -->
+        <grip_count_threshold>1</grip_count_threshold>
+        <max_grip_count>8</max_grip_count>
+
+        <!-- Tolerancia para soltar -->
+        <release_tolerance>0.005</release_tolerance>
+
+        <!-- No desactivar colisiones (el vacío no "penetra") -->
+        <disable_collisions_on_attach>false</disable_collisions_on_attach>
+
+        <!-- Topic opcional para depuración -->
+        <contact_topic>${prefix}vacuum_contacts</contact_topic>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+
+  <!-- ============================================= -->
+  <!-- Propiedades físicas en Gazebo (VGC10)         -->
+  <!-- ============================================= -->
+  <xacro:macro name="onrobot_vgc10_gazebo_properties" params="prefix">
+    <!-- Base del gripper -->
+    <gazebo reference="${prefix}onrobot_base_link">
+      <material>Gazebo/Black</material>
+      <mu1>0.6</mu1>
+      <mu2>0.6</mu2>
+      <kp>1000000.0</kp>
+      <kd>100.0</kd>
+      <fdir1>1 0 0</fdir1>
+      <minDepth>0.001</minDepth>
+    </gazebo>
+
+    <!-- Ventosas (área de contacto) -->
+    <gazebo reference="${prefix}suction_cups">
+      <material>Gazebo/Red</material>
+      <mu1>0.9</mu1>
+      <mu2>0.9</mu2>
+      <kp>1000000.0</kp>
+      <kd>100.0</kd>
+      <fdir1>0 0 -1</fdir1>
+      <minDepth>0.0005</minDepth>
+    </gazebo>
+  </xacro:macro>
+
+
+  <!-- ============================================= -->
+  <!-- Controlador ROS2 para VGC10 (opcional)        -->
+  <!-- ============================================= -->
+  <xacro:macro name="onrobot_vgc10_ros2_control" params="prefix use_fake_hardware:=true connection_type:=tcp ip_address:=192.168.1.1 port:=502 device_address:=65">
+    <xacro:unless value="${use_fake_hardware}">
+      <ros2_control name="VGC10Gripper" type="system">
+        <hardware>
+          <plugin>onrobot_driver::VGCHardwareInterface</plugin>
+          <param name="onrobot_type">vgc10</param>
+          <param name="prefix">${prefix}</param>
+          <param name="connection_type">${connection_type}</param>
+          <param name="ip_address">${ip_address}</param>
+          <param name="port">${port}</param>
+          <param name="device_address">${device_address}</param>
+        </hardware>
+
+        <!-- Joint prismatic simulado para control -->
+        <joint name="${prefix}gripper">
+          <command_interface name="position">
+            <param name="min">-0.1</param>
+            <param name="max">1.0</param>
+          </command_interface>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+      </ros2_control>
+    </xacro:unless>
+  </xacro:macro>
+
+</robot>

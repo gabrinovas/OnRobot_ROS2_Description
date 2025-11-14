@@ -1,60 +1,96 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="onrobot_vg" params="prefix onrobot_type:='vg10'">
-    
-    <!-- Base Link -->
+  <!-- =================================================================== -->
+  <!-- Macro: OnRobot VGC10 / VG10 Vacuum Gripper                          -->
+  <!-- =================================================================== -->
+  <xacro:macro name="onrobot_vg" params="
+      prefix
+      onrobot_type:='vgc10'
+      num_cups:=4
+    ">
+
+    <!-- =============================================================== -->
+    <!-- Determinar carpeta de mallas según tipo                         -->
+    <!-- =============================================================== -->
+    <xacro:property name="mesh_dir" value="${
+        'vg10' if onrobot_type == 'vg10' else 'vgc10'
+      }"/>
+
+    <!-- Sufijo para 1 o 4 ventosas -->
+    <xacro:property name="cup_suffix" value="_${num_cups}cups"/>
+    <xacro:property name="cup_suffix" value="" if="${num_cups == 4}"/>
+
+    <!-- =============================================================== -->
+    <!-- Base Link                                                       -->
+    <!-- =============================================================== -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.5"/>
-        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001"/>
+        <mass value="0.65"/>
+        <inertia ixx="0.0025" ixy="0.0" ixz="0.0"
+                 iyy="0.0025" iyz="0.0" izz="0.0018"/>
       </inertial>
+
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/${onrobot_type}/visual/base_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/${mesh_dir}/visual/base_link${cup_suffix}.stl"
+                scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
+
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/${onrobot_type}/collision/base_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/${mesh_dir}/collision/base_link${cup_suffix}.stl"
+                scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- Suction Cups -->
+    <!-- =============================================================== -->
+    <!-- Suction Cups Link                                               -->
+    <!-- =============================================================== -->
     <link name="${prefix}suction_cups">
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <mass value="0.1"/>
-        <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
+        <origin xyz="0 0 -0.01" rpy="0 0 0"/>
+        <mass value="0.12"/>
+        <inertia ixx="0.0003" ixy="0.0" ixz="0.0"
+                 iyy="0.0003" iyz="0.0" izz="0.00015"/>
       </inertial>
+
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/${onrobot_type}/visual/suction_cups.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/${mesh_dir}/visual/suction_cup${cup_suffix}.stl"
+                scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
+
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/${onrobot_type}/collision/suction_cups.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/${mesh_dir}/collision/suction_cup${cup_suffix}.stl"
+                scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- Suction Cups Joint -->
+    <!-- =============================================================== -->
+    <!-- Joint: Suction Cups                                             -->
+    <!-- =============================================================== -->
     <joint name="${prefix}suction_cups_joint" type="fixed">
       <origin xyz="0 0 0.02" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}suction_cups"/>
     </joint>
 
-    <!-- TCP Link -->
+    <!-- =============================================================== -->
+    <!-- TCP Link (Tool Center Point)                                    -->
+    <!-- =============================================================== -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
       <origin xyz="0 0 0.05" rpy="0 0 0"/>
@@ -62,27 +98,32 @@
       <child link="${prefix}gripper_tcp"/>
     </joint>
 
-    <!-- Dummy joint for ROS Control (simulates gripper state) -->
+    <!-- =============================================================== -->
+    <!-- Dummy Prismatic Joint (para control y visualización)           -->
+    <!-- =============================================================== -->
     <link name="${prefix}gripper_mock_link"/>
     <joint name="${prefix}gripper" type="prismatic">
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_mock_link"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="1.0" velocity="1.0" effort="10"/>
+      <limit lower="0.0" upper="1.0" velocity="0.5" effort="100.0"/>
+      <dynamics damping="0.7" friction="0.0"/>
     </joint>
 
-    <!-- Transmission for ROS Control -->
+    <!-- =============================================================== -->
+    <!-- Transmission (para simulación y control)                        -->
+    <!-- =============================================================== -->
     <transmission name="${prefix}gripper_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="${prefix}gripper">
         <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
       </joint>
-      <actuator name="${prefix}gripper_motor">
-        <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
-        <mechanicalReduction>1</mechanicalReduction>
+      <actuator name="${prefix}gripper_actuator">
+        <mechanicalReduction>1.0</mechanicalReduction>
       </actuator>
     </transmission>
 
   </xacro:macro>
+
 </robot>
