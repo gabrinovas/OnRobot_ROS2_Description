@@ -13,7 +13,6 @@
       ip_address:=192.168.1.1
       port:=502
       device_address:=65
-      num_cups:=4
     ">
 
     <!-- ====================== INCLUSIONES COMUNES ====================== -->
@@ -31,8 +30,8 @@
       <xacro:onrobot_rg6 prefix="${prefix}"/>
     </xacro:if>
 
-    <!-- ====================== 2FG7 / 2FG14 ====================== -->
-    <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+    <!-- ====================== 2FG7 ====================== -->
+    <xacro:if value="${onrobot_type == '2fg7'}">
       <xacro:include filename="$(find onrobot_description)/urdf/2fg7_macro.xacro"/>
       <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
     </xacro:if>
@@ -43,52 +42,45 @@
       <xacro:onrobot_3fg15 prefix="${prefix}"/>
     </xacro:if>
 
-    <!-- ====================== VGC10 ====================== -->
-    <xacro:if value="${onrobot_type == 'vgc10'}">
-      <xacro:include filename="$(find onrobot_description)/urdf/vg_macro.xacro"/>
-      <xacro:include filename="$(find onrobot_description)/urdf/vgc10_gazebo.xacro"/>
-      <xacro:onrobot_vg prefix="${prefix}" onrobot_type="vgc10" num_cups="${num_cups}"/>
-    </xacro:if>
-
     <!-- ====================== GAZEBO: Plugins y Propiedades ====================== -->
     <xacro:if value="${sim_gazebo}">
-      <!-- Solo para 2FG7 (pinzas) -->
-      <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
-        <xacro:include filename="$(find onrobot_description)/urdf/2fg7_gazebo.xacro"/>
+      <!-- Gazebo ROS Control Plugin -->
+      <gazebo>
+        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+          <parameters>$(find onrobot_description)/config/gazebo_controllers.yaml</parameters>
+        </plugin>
+      </gazebo>
+
+      <!-- Para 2FG7 -->
+      <xacro:if value="${onrobot_type == '2fg7'}">
+        <xacro:include filename="$(find onrobot_description)/urdf/inc/2fg7_gazebo.xacro"/>
         <xacro:onrobot_2fg7_grasp_plugin prefix="${prefix}"/>
         <xacro:onrobot_2fg7_mimic_plugin prefix="${prefix}"/>
         <xacro:onrobot_2fg7_gazebo_properties prefix="${prefix}"/>
       </xacro:if>
 
-      <!-- Solo para VGC10 (vacío) -->
-      <xacro:if value="${onrobot_type == 'vgc10'}">
-        <xacro:onrobot_vgc10_vacuum_plugin prefix="${prefix}" num_cups="${num_cups}"/>
-        <xacro:onrobot_vgc10_gazebo_properties prefix="${prefix}"/>
+      <!-- Para 3FG15 -->
+      <xacro:if value="${onrobot_type == '3fg15'}">
+        <xacro:include filename="$(find onrobot_description)/urdf/inc/3fg15_gazebo.xacro"/>
+        <xacro:onrobot_3fg15_grasp_plugin prefix="${prefix}"/>
+        <xacro:onrobot_3fg15_mimic_plugin prefix="${prefix}"/>
+        <xacro:onrobot_3fg15_gazebo_properties prefix="${prefix}"/>
       </xacro:if>
     </xacro:if>
 
-    <!-- ====================== ROS2 CONTROL (REAL) ====================== -->
-    <xacro:unless value="${use_fake_hardware}">
+    <!-- ====================== ROS2 CONTROL ====================== -->
+    <xacro:if value="${not use_fake_hardware}">
       <ros2_control name="OnRobotGripper" type="system">
         <hardware>
-          <!-- Selección del plugin según tipo -->
           <xacro:if value="${onrobot_type == '3fg15'}">
             <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
           </xacro:if>
-          <xacro:elseif value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+          <xacro:elseif value="${onrobot_type == '2fg7'}">
             <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
           </xacro:elseif>
           <xacro:elseif value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
             <plugin>onrobot_driver::RGHardwareInterface</plugin>
           </xacro:elseif>
-          <xacro:elseif value="${onrobot_type == 'vgc10'}">
-            <plugin>onrobot_driver::VGCHardwareInterface</plugin>
-          </xacro:elseif>
-          <xacro:else>
-            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin> <!-- fallback -->
-          </xacro:else>
-
-          <!-- Parámetros comunes -->
           <param name="onrobot_type">${onrobot_type}</param>
           <param name="prefix">${prefix}</param>
           <param name="connection_type">${connection_type}</param>
@@ -96,10 +88,9 @@
           <param name="ip_address">${ip_address}</param>
           <param name="port">${port}</param>
           <param name="device_address">${device_address}</param>
-          <param name="use_fake_hardware">false</param>
         </hardware>
 
-        <!-- JOINT DE CONTROL SEGÚN TIPO -->
+        <!-- Joint definitions -->
         <xacro:if value="${onrobot_type == '3fg15'}">
           <joint name="${prefix}finger_diameter">
             <command_interface name="position"/>
@@ -107,16 +98,15 @@
             <state_interface name="velocity"/>
           </joint>
         </xacro:if>
-
-        <xacro:unless value="${onrobot_type == '3fg15'}">
+        <xacro:else>
           <joint name="${prefix}finger_width">
             <command_interface name="position"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
           </joint>
-        </xacro:unless>
+        </xacro:else>
       </ros2_control>
-    </xacro:unless>
+    </xacro:if>
 
   </xacro:macro>
 </robot>

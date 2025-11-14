@@ -3,8 +3,8 @@
 Filename: view_onrobot.launch.py
 Author: Tú + Grok (adaptado)
 Description:
-    Launch file para visualizar y simular grippers OnRobot (incluyendo VGC10).
-    Soporta: rg2, rg6, 2fg7, 3fg15, vgc10 (1/4 cups), vg10
+    Launch file para visualizar y simular grippers OnRobot.
+    Soporta: rg2, rg6, 2fg7, 3fg15
 """
 
 from launch import LaunchDescription
@@ -22,10 +22,7 @@ def launch_setup(context, *args, **kwargs):
     prefix = LaunchConfiguration("prefix").perform(context)
     ns = LaunchConfiguration("ns").perform(context)
     sim_gazebo = LaunchConfiguration("sim_gazebo").perform(context) == "true"
-    num_cups = LaunchConfiguration("num_cups").perform(context)
-
-    # Ajustar onrobot_type para compatibilidad con carpetas
-    mesh_type = "vg10" if onrobot_type == "vg10" else "vgc10"
+    use_fake_hardware = LaunchConfiguration("use_fake_hardware").perform(context) == "true"
 
     # Generar robot_description con xacro
     robot_description_content = Command(
@@ -40,14 +37,9 @@ def launch_setup(context, *args, **kwargs):
             " ",
             f"name:=onrobot",
             " ",
-            f"use_fake_hardware:=true",
+            f"use_fake_hardware:={str(use_fake_hardware).lower()}",
             " ",
             f"sim_gazebo:={str(sim_gazebo).lower()}",
-            " ",
-            f"num_cups:={num_cups}",
-            " ",
-            f"mesh_type:={mesh_type}",
-            " ",
         ]
     )
     robot_description = {
@@ -62,17 +54,6 @@ def launch_setup(context, *args, **kwargs):
     # Nodes
     nodes = []
 
-    # Joint State Publisher GUI
-    nodes.append(
-        Node(
-            namespace=ns,
-            package="joint_state_publisher_gui",
-            executable="joint_state_publisher_gui",
-            name="joint_state_publisher_gui",
-            output="screen",
-        )
-    )
-
     # Robot State Publisher
     nodes.append(
         Node(
@@ -81,6 +62,17 @@ def launch_setup(context, *args, **kwargs):
             executable="robot_state_publisher",
             output="both",
             parameters=[robot_description],
+        )
+    )
+
+    # Joint State Publisher GUI
+    nodes.append(
+        Node(
+            namespace=ns,
+            package="joint_state_publisher_gui",
+            executable="joint_state_publisher_gui",
+            name="joint_state_publisher_gui",
+            output="screen",
         )
     )
 
@@ -98,26 +90,29 @@ def launch_setup(context, *args, **kwargs):
 
     # Gazebo (opcional)
     if sim_gazebo:
-        nodes.append(
-            Node(
-                package="gazebo_ros",
-                executable="spawn_entity.py",
-                arguments=["-topic", f"/{ns}/robot_description", "-entity", "onrobot_gripper"],
-                output="screen",
-            )
-        )
+        # Start Gazebo
         nodes.append(
             Node(
                 package="gazebo_ros",
                 executable="gzserver",
                 output="screen",
-                arguments=["--verbose"],
+                arguments=["--verbose", "-s", "libgazebo_ros_factory.so"],
             )
         )
         nodes.append(
             Node(
                 package="gazebo_ros",
                 executable="gzclient",
+                output="screen",
+            )
+        )
+        
+        # Spawn gripper in Gazebo
+        nodes.append(
+            Node(
+                package="gazebo_ros",
+                executable="spawn_entity.py",
+                arguments=["-topic", f"/{ns}/robot_description", "-entity", f"onrobot_{onrobot_type}"],
                 output="screen",
             )
         )
@@ -134,17 +129,7 @@ def generate_launch_description():
             "onrobot_type",
             default_value="2fg7",
             description="Tipo de gripper OnRobot.",
-            choices=["rg2", "rg6", "2fg7", "3fg15", "vgc10", "vg10"]
-        )
-    )
-
-    # num_cups (solo para vgc10)
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "num_cups",
-            default_value="4",
-            description="Número de ventosas para VGC10: 1 o 4.",
-            choices=["1", "4"]
+            choices=["rg2", "rg6", "2fg7", "3fg15"]
         )
     )
 
@@ -181,6 +166,16 @@ def generate_launch_description():
             "sim_gazebo",
             default_value="false",
             description="Iniciar Gazebo para simulación.",
+            choices=["true", "false"]
+        )
+    )
+
+    # use_fake_hardware
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "use_fake_hardware",
+            default_value="true",
+            description="Usar hardware falso para testing.",
             choices=["true", "false"]
         )
     )

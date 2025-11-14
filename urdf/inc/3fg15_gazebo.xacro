@@ -28,30 +28,30 @@
     <!-- Left finger mimic -->
     <gazebo>
       <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_3fg15_left">
-        <joint>${prefix}finger_width</joint>
-        <mimicJoint>${prefix}left_finger_joint</mimicJoint>
-        <multiplier>${(2*pi/3)/(0.1175 - 0.0088)}</multiplier>
-        <offset>${-pi/3 - (2*pi/3)/(0.1175 - 0.0088) * 0.0088}</offset>
+        <joint>${prefix}left_finger_joint</joint>
+        <mimicJoint>${prefix}finger_diameter</mimicJoint>
+        <multiplier>${(2*pi/3)/(0.150 - 0.0)}</multiplier>
+        <offset>${-pi/3}</offset>
       </plugin>
     </gazebo>
     
     <!-- Right finger mimic -->
     <gazebo>
       <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_3fg15_right">
-        <joint>${prefix}finger_width</joint>
-        <mimicJoint>${prefix}right_finger_joint</mimicJoint>
-        <multiplier>${(2*pi/3)/(0.1175 - 0.0088)}</multiplier>
-        <offset>${-pi/3 - (2*pi/3)/(0.1175 - 0.0088) * 0.0088}</offset>
+        <joint>${prefix}right_finger_joint</joint>
+        <mimicJoint>${prefix}finger_diameter</mimicJoint>
+        <multiplier>${(2*pi/3)/(0.150 - 0.0)}</multiplier>
+        <offset>${-pi/3}</offset>
       </plugin>
     </gazebo>
     
     <!-- Middle finger mimic -->
     <gazebo>
       <plugin filename="libroboticsgroup_upatras_gazebo_mimic_joint_plugin.so" name="mimic_3fg15_middle">
-        <joint>${prefix}finger_width</joint>
-        <mimicJoint>${prefix}middle_finger_joint</mimicJoint>
-        <multiplier>${(2*pi/3)/(0.1175 - 0.0088)}</multiplier>
-        <offset>${-pi/3 - (2*pi/3)/(0.1175 - 0.0088) * 0.0088}</offset>
+        <joint>${prefix}middle_finger_joint</joint>
+        <mimicJoint>${prefix}finger_diameter</mimicJoint>
+        <multiplier>${(2*pi/3)/(0.150 - 0.0)}</multiplier>
+        <offset>${-pi/3}</offset>
       </plugin>
     </gazebo>
   </xacro:macro>

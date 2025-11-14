@@ -3,9 +3,7 @@
 <package format="3">
   <name>onrobot_description</name>
   <version>0.0.1</version>
-  <description>
-  	URDF description of OnRobot grippers
-  </description>
+  <description>URDF description of OnRobot grippers</description>
   
   <maintainer email="tonyle98@outlook.com">Tony Le</maintainer>
   <license>MIT</license>
@@ -19,11 +17,11 @@
   <exec_depend>rviz2</exec_depend>
   <exec_depend>urdf</exec_depend>
   <exec_depend>xacro</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>gazebo_plugins</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
-  <test_depend>liburdfdom-tools</test_depend>
-  <test_depend>xacro</test_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
