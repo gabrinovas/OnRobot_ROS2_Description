@@ -72,15 +72,17 @@
     <xacro:if value="${not use_fake_hardware}">
       <ros2_control name="OnRobotGripper" type="system">
         <hardware>
+          <!-- Use separate if blocks instead of elseif -->
           <xacro:if value="${onrobot_type == '3fg15'}">
             <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
           </xacro:if>
-          <xacro:elseif value="${onrobot_type == '2fg7'}">
+          <xacro:if value="${onrobot_type == '2fg7'}">
             <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
-          </xacro:elseif>
-          <xacro:elseif value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+          </xacro:if>
+          <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
             <plugin>onrobot_driver::RGHardwareInterface</plugin>
-          </xacro:elseif>
+          </xacro:if>
+          
           <param name="onrobot_type">${onrobot_type}</param>
           <param name="prefix">${prefix}</param>
           <param name="connection_type">${connection_type}</param>
@@ -98,13 +100,13 @@
             <state_interface name="velocity"/>
           </joint>
         </xacro:if>
-        <xacro:else>
+        <xacro:if value="${onrobot_type != '3fg15'}">
           <joint name="${prefix}finger_width">
             <command_interface name="position"/>
             <state_interface name="position"/>
             <state_interface name="velocity"/>
           </joint>
-        </xacro:else>
+        </xacro:if>
       </ros2_control>
     </xacro:if>
 
