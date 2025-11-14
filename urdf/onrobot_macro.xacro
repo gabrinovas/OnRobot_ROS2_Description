@@ -43,12 +43,6 @@
       <xacro:onrobot_3fg15 prefix="${prefix}"/>
     </xacro:if>
 
-    <!-- ====================== VG10 (legacy) ====================== -->
-    <xacro:if value="${onrobot_type == 'vg10'}">
-      <xacro:include filename="$(find onrobot_description)/urdf/vg_macro.xacro"/>
-      <xacro:onrobot_vg prefix="${prefix}" onrobot_type="vg10" num_cups="${num_cups}"/>
-    </xacro:if>
-
     <!-- ====================== VGC10 ====================== -->
     <xacro:if value="${onrobot_type == 'vgc10'}">
       <xacro:include filename="$(find onrobot_description)/urdf/vg_macro.xacro"/>
@@ -75,33 +69,27 @@
 
     <!-- ====================== ROS2 CONTROL (REAL) ====================== -->
     <xacro:unless value="${use_fake_hardware}">
-      <ros2_control name="OnRobotGripper" type="actuator">
+      <ros2_control name="OnRobotGripper" type="system">
         <hardware>
-          <!-- 2FG7 / 2FG14 -->
-          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
-            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
-            <param name="onrobot_type">${onrobot_type}</param>
-          </xacro:if>
-
-          <!-- 3FG15 -->
+          <!-- Selección del plugin según tipo -->
           <xacro:if value="${onrobot_type == '3fg15'}">
             <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
-            <param name="onrobot_type">${onrobot_type}</param>
           </xacro:if>
-
-          <!-- RG2 / RG6 -->
-          <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+          <xacro:elseif value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
+          </xacro:elseif>
+          <xacro:elseif value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
             <plugin>onrobot_driver::RGHardwareInterface</plugin>
-            <param name="onrobot_type">${onrobot_type}</param>
-          </xacro:if>
-
-          <!-- VGC10 -->
-          <xacro:if value="${onrobot_type == 'vgc10'}">
+          </xacro:elseif>
+          <xacro:elseif value="${onrobot_type == 'vgc10'}">
             <plugin>onrobot_driver::VGCHardwareInterface</plugin>
-            <param name="onrobot_type">vgc10</param>
-          </xacro:if>
+          </xacro:elseif>
+          <xacro:else>
+            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin> <!-- fallback -->
+          </xacro:else>
 
           <!-- Parámetros comunes -->
+          <param name="onrobot_type">${onrobot_type}</param>
           <param name="prefix">${prefix}</param>
           <param name="connection_type">${connection_type}</param>
           <param name="device">${device}</param>
@@ -111,12 +99,22 @@
           <param name="use_fake_hardware">false</param>
         </hardware>
 
-        <!-- Joint de control (mismo nombre en todos los macros) -->
-        <joint name="${prefix}gripper">
-          <command_interface name="position"/>
-          <state_interface name="position"/>
-          <state_interface name="velocity"/>
-        </joint>
+        <!-- JOINT DE CONTROL SEGÚN TIPO -->
+        <xacro:if value="${onrobot_type == '3fg15'}">
+          <joint name="${prefix}finger_diameter">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+        </xacro:if>
+
+        <xacro:unless value="${onrobot_type == '3fg15'}">
+          <joint name="${prefix}finger_width">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+        </xacro:unless>
       </ros2_control>
     </xacro:unless>
 

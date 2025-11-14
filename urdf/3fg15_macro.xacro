@@ -1,19 +1,19 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
+
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
 
-  <!-- Macro for OnRobot 3FG15 three-finger revolutionary gripper -->
+  <!-- Macro para OnRobot 3FG15 -->
   <xacro:macro name="onrobot_3fg15" params="prefix onrobot_type:='3fg15'">
 
-    <!-- Constants for 3FG15 -->
-    <xacro:property name="max_aperture" value="0.1175" /> <!-- 117.5mm in meters -->
-    <xacro:property name="min_aperture" value="0.0088" /> <!-- 8.8mm in meters -->
-    <xacro:property name="finger_radius" value="0.05875" /> <!-- Radius from center to finger tip -->
+    <!-- Constantes -->
+    <xacro:property name="min_diameter" value="0.000" />
+    <xacro:property name="max_diameter" value="0.150" />
 
     <!-- Base Link -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
         <mass value="1.2"/>
         <inertia ixx="0.012" ixy="0.0" ixz="0.0" iyy="0.012" iyz="0.0" izz="0.008"/>
       </inertial>
@@ -22,17 +22,18 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/visual/base.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0.04" rpy="0 0 0"/>
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/collision/base.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- Left Finger Link -->
+    <!-- === DEDOS (con movimiento real via mimic) === -->
+
+    <!-- Left Finger -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -44,7 +45,6 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/visual/left_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -54,7 +54,7 @@
       </collision>
     </link>
 
-    <!-- Right Finger Link -->
+    <!-- Right Finger -->
     <link name="${prefix}right_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -66,7 +66,6 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/visual/right_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -76,7 +75,7 @@
       </collision>
     </link>
 
-    <!-- Middle Finger Link -->
+    <!-- Middle Finger -->
     <link name="${prefix}middle_finger_link">
       <inertial>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -88,7 +87,6 @@
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/visual/middle_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
-        <material name="onrobot_silver"/>
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -98,58 +96,63 @@
       </collision>
     </link>
 
-    <!-- Dummy link for the main control joint -->
+    <!-- Dummy link para control -->
     <link name="${prefix}finger_width_mock_link"/>
-    
-    <!-- Main control joint (finger_width) - represents aperture diameter -->
-    <joint name="${prefix}finger_width" type="revolute">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+
+    <!-- JOINT PRINCIPAL (para el driver) -->
+    <joint name="${prefix}finger_diameter" type="prismatic">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
-      <axis xyz="0 0 1"/>
-      <limit lower="${min_aperture}" upper="${max_aperture}" velocity="0.25" effort="200"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="0.0" upper="0.150" effort="200" velocity="0.5"/>
     </joint>
 
-    <!-- Left Finger Joint (Revolute) -->
+    <!-- === DEDOS: REVOLUTE + MIMIC === -->
+    <xacro:property name="angle_per_meter" value="${(2*pi/3)/(0.150 - 0.0)}" />  <!-- 120° en 150mm -->
+    <xacro:property name="min_angle" value="${-pi/3}" />  <!-- -60° -->
+    <xacro:property name="offset" value="${min_angle - angle_per_meter * 0.0}" />
+
+    <!-- Left Finger -->
     <joint name="${prefix}left_finger_joint" type="revolute">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
+      <origin xyz="0 0 0" rpy="${pi}" />
       <axis xyz="0 0 1"/>
-      <limit lower="${-pi/3}" upper="${pi/3}" effort="200" velocity="0.25"/>
-      <mimic joint="${prefix}finger_width" multiplier="${(2*pi/3)/(max_aperture - min_aperture)}" offset="${-pi/3 - (2*pi/3)/(max_aperture - min_aperture) * min_aperture}"/>
+      <limit lower="${-pi/3}" upper="${pi/3}" effort="200" velocity="0.5"/>
+      <mimic joint="${prefix}finger_diameter" multiplier="${angle_per_meter}" offset="${offset}"/>
     </joint>
 
-    <!-- Right Finger Joint (Revolute) -->
+    <!-- Right Finger -->
     <joint name="${prefix}right_finger_joint" type="revolute">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
+      <origin xyz="0 0 0" rpy="0" />
       <axis xyz="0 0 1"/>
-      <limit lower="${-pi/3}" upper="${pi/3}" effort="200" velocity="0.25"/>
-      <mimic joint="${prefix}finger_width" multiplier="${(2*pi/3)/(max_aperture - min_aperture)}" offset="${-pi/3 - (2*pi/3)/(max_aperture - min_aperture) * min_aperture}"/>
+      <limit lower="${-pi/3}" upper="${pi/3}" effort="200" velocity="0.5"/>
+      <mimic joint="${prefix}finger_diameter" multiplier="${angle_per_meter}" offset="${offset}"/>
     </joint>
 
-    <!-- Middle Finger Joint (Revolute) -->
+    <!-- Middle Finger -->
     <joint name="${prefix}middle_finger_joint" type="revolute">
-      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}middle_finger_link"/>
+      <origin xyz="0 0 0" rpy="${2*pi/3}" />
       <axis xyz="0 0 1"/>
-      <limit lower="${-pi/3}" upper="${pi/3}" effort="200" velocity="0.25"/>
-      <mimic joint="${prefix}finger_width" multiplier="${(2*pi/3)/(max_aperture - min_aperture)}" offset="${-pi/3 - (2*pi/3)/(max_aperture - min_aperture) * min_aperture}"/>
+      <limit lower="${-pi/3}" upper="${pi/3}" effort="200" velocity="0.5"/>
+      <mimic joint="${prefix}finger_diameter" multiplier="${angle_per_meter}" offset="${offset}"/>
     </joint>
 
-    <!-- TCP Link -->
+    <!-- TCP -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
-      <origin xyz="0 0 0.08" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
+      <origin xyz="0 0 0.13" rpy="0 0 0"/>
     </joint>
 
-    <!-- Transmission for ROS Control -->
-    <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
+    <!-- Transmission -->
+    <xacro:transmission_macro prefix="${prefix}" joint_name="finger_diameter"/>
 
   </xacro:macro>
 </robot>
