@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
   <!-- Macro for OnRobot 3FG15 three-finger revolutionary gripper -->
   <xacro:macro name="onrobot_3fg15" params="prefix onrobot_type:='3fg15'">
