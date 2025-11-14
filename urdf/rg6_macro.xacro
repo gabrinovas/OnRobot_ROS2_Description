@@ -3,6 +3,7 @@
 
   <xacro:property name="onrobot_type" value="rg6" />
   <xacro:include filename="$(find onrobot_description)/urdf/inc/rg_common.xacro" />
+  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
   <!-- Define the missing macros that are referenced but not defined -->
   <xacro:macro name="onrobot_base_link" params="prefix">
