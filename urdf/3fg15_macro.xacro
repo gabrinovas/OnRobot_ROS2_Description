@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/2fg7_materials.xacro" />
+  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
   <!-- ============================================= -->
   <!-- Usa joint: finger_width → topic: /finger_width_controller/commands -->
