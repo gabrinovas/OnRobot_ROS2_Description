@@ -83,7 +83,7 @@ def generate_launch_description():
             "onrobot_type",
             default_value="2fg7",
             description="OnRobot type to load.",
-            choices=["rg2", "rg6", "2fg7"]
+            choices=["rg2", "rg6", "2fg7", "3fg15"]
         )
     )
     declared_arguments.append(
