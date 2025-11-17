@@ -33,7 +33,7 @@
       <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
     </xacro:if>
 
-    <!-- ====================== 3FG15 (NUEVO) ====================== -->
+    <!-- ====================== 3FG15 ====================== -->
     <xacro:if value="${onrobot_type == '3fg15'}">
       <xacro:include filename="$(find onrobot_description)/urdf/3fg15_macro.xacro"/>
       <xacro:onrobot_3fg15 prefix="${prefix}"/>
@@ -52,9 +52,9 @@
     <xacro:unless value="${use_fake_hardware}">
       <ros2_control name="OnRobotGripper" type="actuator">
         <hardware>
-          <!-- 2FG7, 2FG14 y 3FG15 usan el mismo driver -->
-          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14' or onrobot_type == '3fg15'}">
-            <plugin>onrobot_driver::FGHardwareInterface</plugin>
+          <!-- 2FG7 / 2FG14 - TwoFG Hardware Interface -->
+          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
             <param name="onrobot_type">${onrobot_type}</param>
             <param name="prefix">${prefix}</param>
             <param name="connection_type">${connection_type}</param>
@@ -65,7 +65,20 @@
             <param name="use_fake_hardware">false</param>
           </xacro:if>
 
-          <!-- RG2 / RG6 -->
+          <!-- 3FG15 - ThreeFG Hardware Interface -->
+          <xacro:if value="${onrobot_type == '3fg15'}">
+            <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">false</param>
+          </xacro:if>
+
+          <!-- RG2 / RG6 - RG Hardware Interface -->
           <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
             <plugin>onrobot_driver::RGHardwareInterface</plugin>
             <param name="onrobot_type">${onrobot_type}</param>
@@ -74,17 +87,92 @@
             <param name="device">${device}</param>
             <param name="ip_address">${ip_address}</param>
             <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
             <param name="use_fake_hardware">false</param>
           </xacro:if>
         </hardware>
 
-        <joint name="${prefix}finger_width">
-          <command_interface name="position"/>
-          <state_interface name="position"/>
-          <state_interface name="velocity"/>
-        </joint>
+        <!-- Joint configuration for all gripper types -->
+        <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14' or onrobot_type == '3fg15'}">
+          <joint name="${prefix}finger_width">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+        </xacro:if>
+
+        <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+          <joint name="${prefix}gripper_finger_joint">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+        </xacro:if>
       </ros2_control>
     </xacro:unless>
+
+    <!-- ====================== Fake Hardware (for testing) ====================== -->
+    <xacro:if value="${use_fake_hardware}">
+      <ros2_control name="OnRobotGripper" type="actuator">
+        <hardware>
+          <!-- 2FG7 / 2FG14 - TwoFG Hardware Interface with fake hardware -->
+          <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14'}">
+            <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">true</param>
+          </xacro:if>
+
+          <!-- 3FG15 - ThreeFG Hardware Interface with fake hardware -->
+          <xacro:if value="${onrobot_type == '3fg15'}">
+            <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">true</param>
+          </xacro:if>
+
+          <!-- RG2 / RG6 - RG Hardware Interface with fake hardware -->
+          <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+            <plugin>onrobot_driver::RGHardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">true</param>
+          </xacro:if>
+        </hardware>
+
+        <!-- Joint configuration for all gripper types -->
+        <xacro:if value="${onrobot_type == '2fg7' or onrobot_type == '2fg14' or onrobot_type == '3fg15'}">
+          <joint name="${prefix}finger_width">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+        </xacro:if>
+
+        <xacro:if value="${onrobot_type == 'rg2' or onrobot_type == 'rg6'}">
+          <joint name="${prefix}gripper_finger_joint">
+            <command_interface name="position"/>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+          </joint>
+        </xacro:if>
+      </ros2_control>
+    </xacro:if>
 
   </xacro:macro>
 </robot>
