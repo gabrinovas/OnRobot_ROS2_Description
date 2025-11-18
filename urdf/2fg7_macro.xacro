@@ -80,12 +80,12 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0" upper="0.035" velocity="0.45" effort="140"/>
+      <limit lower="0.035" upper="0.07" velocity="0.45" effort="140"/>
     </joint>
 
     <!-- Left Finger Joint -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
-      <origin xyz="-0.0175 0 0" rpy="0 0 0"/>
+      <origin xyz="-0.035 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
@@ -95,7 +95,7 @@
 
     <!-- Right Finger Joint -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
-      <origin xyz="0.0175 0 0" rpy="0 0 0"/>
+      <origin xyz="0.035 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
