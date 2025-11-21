@@ -2,15 +2,11 @@
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
+  <xacro:include filename="$(find onrobot_description)/urdf/inc/2fg7_materials.xacro" />
 
   <xacro:macro name="onrobot_3fg15" params="prefix onrobot_type:='3fg15'">
 
-    <!-- ==================== Parámetros de escala visual/real ==================== -->
-    <xacro:property name="max_real_width"   value="0.150"/>   <!-- metros (ancho máximo real) -->
-    <xacro:property name="max_visual_angle" value="2.9"/>     <!-- radianes cuando está totalmente abierto -->
-    <xacro:property name="angle_multiplier" value="${-max_visual_angle / max_real_width}"/> <!-- ≈ -19.3333 -->
-
+    
     <!-- ====================== Base Link ====================== -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
@@ -33,7 +29,8 @@
       </collision>
     </link>
 
-    <!-- ====================== Dedos ====================== -->
+    <!-- ====================== Dedos individuales ====================== -->
+    <!-- Dedo izquierdo (120° a la izquierda) -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0.026 -0.015 0" rpy="${-pi/2} 0 0"/>
@@ -48,13 +45,14 @@
         <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0.026 -0.015 0" rpy="${-pi/2} 0 0"/>
+        <origin xyz=" 0.026 -0.015 0 " rpy="${-pi/2} 0 0"/>
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/collision/left_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
+    <!-- Dedo derecho (120° a la derecha) -->
     <link name="${prefix}right_finger_link">
       <inertial>
         <origin xyz="-0.026 -0.015 -0.15" rpy="${-pi/2} 0 0"/>
@@ -62,7 +60,7 @@
         <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
       </inertial>
       <visual>
-        <origin xyz="-0.026 -0.015 -0.150" rpy="${-pi/2} 0 0"/>
+        <origin xyz="-0.0260 -0.0150 -0.1500" rpy="${-pi/2} 0 0"/>
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/visual/right_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
@@ -76,85 +74,154 @@
       </collision>
     </link>
 
+    <!-- Dedo central (hacia abajo) -->
     <link name="${prefix}center_finger_link">
       <inertial>
-        <origin xyz="0 0.03 0" rpy="${-pi/2} 0 0"/>
+        <origin xyz="0 +0.03 0 " rpy="${-pi/2} 0 0"/>
         <mass value="0.08"/>
         <inertia ixx="0.0001" ixy="0.0" ixz="0.0" iyy="0.0001" iyz="0.0" izz="0.0001"/>
       </inertial>
       <visual>
-        <origin xyz="0 0.03 0" rpy="${-pi/2} 0 0"/>
+        <origin xyz="0 +0.03 0" rpy="${-pi/2} 0 0"/>
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/visual/middle_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0 0.03 0" rpy="${-pi/2} 0 0"/>
+        <origin xyz="0 +0.03 0" rpy="${-pi/2} 0 0"/>
         <geometry>
           <mesh filename="package://onrobot_description/meshes/3fg15/collision/middle_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
 
-    <!-- ====================== Mock link (solo para el joint prismatic) ====================== -->
+    <!-- ====================== Mock link para el joint principal ====================== -->
     <link name="${prefix}finger_width_mock_link">
       <inertial>
-        <mass value="1e-9"/>
-        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+        <mass value="0.001"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
       </inertial>
     </link>
 
-    <!-- ====================== Joint principal EN METROS (para el robot real) ====================== -->
-    <joint name="${prefix}finger_width" type="prismatic">
+    <!-- ====================== Joint principal de control (0 a 150 mm) ====================== -->
+    <joint name="${prefix}finger_width" type="revolute">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_real_width}" effort="300" velocity="0.2"/>
-      <dynamics damping="5.0" friction="0.0"/>
+      <limit lower="0.0" upper="2.8" effort="140" velocity="0.45"/>
     </joint>
 
-    <!-- ====================== Joints de dedos (revolute + mimic escalado) ====================== -->
+
+    <!-- ====================== Eje Z visual (debug) ====================== -->
+   
+    <!--
+    <link name="${prefix}z_axis_visual_link2">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>  
+        <geometry>
+          <cylinder radius="0.001" length="0.18"/> 
+        </geometry>
+        <material name="">
+          <color rgba="0 0 1 1"/>   
+        </material>
+      </visual>
+    </link>  
+
+    <joint name="${prefix}z_axis_visual_joint2" type="fixed">
+      <parent link="${prefix}onrobot_base_link"/>
+      <child  link="${prefix}z_axis_visual_link2"/>
+      <origin xyz="0 -0.02783 0.000" rpy="0 0 0"/>
+    </joint>
+
+
+    <link name="${prefix}z_axis_visual_link3">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/> 
+        <geometry>W
+          <cylinder radius="0.001" length="0.18"/>   
+        </geometry>
+        <material name="">
+          <color rgba="0 0 1 1"/>  
+        </material>
+      </visual>
+    </link>
+
+    <joint name="${prefix}z_axis_visual_joint3" type="fixed">
+      <parent link="${prefix}onrobot_base_link"/>
+      <child  link="${prefix}z_axis_visual_link3"/>
+      <origin xyz="-0.02492 0.01299 0" rpy="0 0 0"/>
+    </joint>
+
+
+    <link name="${prefix}z_axis_visual_link4">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>  
+        <geometry>
+          <cylinder radius="0.001" length="0.18"/>  
+        </geometry>
+        <material name="">
+          <color rgba="0 0 1 1"/>  
+        </material>
+      </visual>
+    </link>
+
+    <joint name="${prefix}z_axis_visual_joint4" type="fixed">
+      <parent link="${prefix}onrobot_base_link"/>
+      <child  link="${prefix}z_axis_visual_link4"/>
+      <origin xyz=" 0.02492 0.01299  0" rpy="0 0 0"/>
+    </joint>  
+    -->
+  
+        
+    <!-- ====================== Joints de los dedos (mimic del principal) ====================== -->
+    <!-- Los tres dedos se mueven radialmente según el ancho (finger_width / 3 por dedo) -->
+  
     <joint name="${prefix}left_finger_joint" type="revolute">
+      
+      <origin xyz="-0.026 0.015 0" rpy = "0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
-      <origin xyz="-0.026 0.015 0" rpy="0 0 0"/>
+
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_visual_angle}" effort="140" velocity="2.0"/>
-      <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
+      
+      <limit lower="0.0" upper="3.14" effort="140" velocity="0.45"/>
+      <mimic joint="${prefix}finger_width" offset="0"/>
     </joint>
 
     <joint name="${prefix}right_finger_joint" type="revolute">
+
+      <origin xyz="0.026 0.015 0.15" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
-      <origin xyz="0.026 0.015 0.15" rpy="0 0 0"/>
+
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_visual_angle}" effort="140" velocity="2.0"/>
-      <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
+      <limit lower="0.0" upper="3.14" effort="140" velocity="0.45"/>
+      <mimic joint="${prefix}finger_width"  offset="0"/>
     </joint>
 
     <joint name="${prefix}center_finger_joint" type="revolute">
+
+      <origin xyz="0 -0.03 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}center_finger_link"/>
-      <origin xyz="0 -0.03 0" rpy="0 0 0"/>
+
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_visual_angle}" effort="140" velocity="2.0"/>
-      <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
+      <limit lower="0.0" upper="3.14" effort="140" velocity="0.45"/>
+      <mimic joint="${prefix}finger_width"  offset="0"/>
     </joint>
 
     <!-- ====================== TCP (punto de agarre) ====================== -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
-      <origin xyz="0 0 0.135" rpy="0 0 0"/> <!-- 135 mm desde la base según datasheet oficial -->
     </joint>
 
-    <!-- ====================== Transmission para ros2_control ====================== -->
+    <!-- ====================== Transmission para ROS Control ====================== -->
     <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
-
-   
 
   </xacro:macro>
 </robot>
