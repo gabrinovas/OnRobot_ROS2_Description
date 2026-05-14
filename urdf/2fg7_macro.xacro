@@ -106,7 +106,7 @@
     <!-- TCP Link -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
-      <origin xyz="0 0 0.08" rpy="0 0 0"/>
+      <origin xyz="0 0 0.1386" rpy="0 0 0"/> <!-- 138.6 mm respecto al tool0/base_link -->
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
     </joint>
