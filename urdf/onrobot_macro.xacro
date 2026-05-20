@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <!-- Macro principal para todos los grippers OnRobot -->
+  <!-- Main macro for all OnRobot grippers -->
   <xacro:macro name="onrobot"
     params="
       onrobot_type

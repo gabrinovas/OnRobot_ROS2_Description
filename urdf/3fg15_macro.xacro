@@ -6,9 +6,9 @@
 
   <xacro:macro name="onrobot_3fg15" params="prefix onrobot_type:='3fg15'">
 
-    <!-- ==================== Parámetros de escala visual/real ==================== -->
-    <xacro:property name="max_real_width"   value="0.150"/>   <!-- metros (ancho máximo real) -->
-    <xacro:property name="max_visual_angle" value="2.9"/>     <!-- radianes cuando está totalmente abierto -->
+    <!-- ==================== Visual/real scale parameters ==================== -->
+    <xacro:property name="max_real_width"   value="0.150"/>   <!-- meters (max real width) -->
+    <xacro:property name="max_visual_angle" value="2.9"/>     <!-- radians when fully open -->
     <xacro:property name="angle_multiplier" value="${-max_visual_angle / max_real_width}"/> <!-- ≈ -19.3333 -->
 
     <!-- ====================== Base Link ====================== -->
@@ -33,7 +33,7 @@
       </collision>
     </link>
 
-    <!-- ====================== Dedos ====================== -->
+    <!-- ====================== Fingers ====================== -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0.026 -0.015 0" rpy="${-pi/2} 0 0"/>
@@ -97,7 +97,7 @@
       </collision>
     </link>
 
-    <!-- ====================== Mock link (solo para el joint prismatic) ====================== -->
+    <!-- ====================== Mock link (only for prismatic joint) ====================== -->
     <link name="${prefix}finger_width_mock_link">
       <inertial>
         <mass value="1e-9"/>
@@ -105,7 +105,7 @@
       </inertial>
     </link>
 
-    <!-- ====================== Joint principal EN METROS (para el robot real) ====================== -->
+    <!-- ====================== Main joint IN METERS (for real robot) ====================== -->
     <joint name="${prefix}finger_width" type="prismatic">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
@@ -115,7 +115,7 @@
       <dynamics damping="5.0" friction="0.0"/>
     </joint>
 
-    <!-- ====================== Joints de dedos (revolute + mimic escalado) ====================== -->
+    <!-- ====================== Finger joints (revolute + scaled mimic) ====================== -->
     <joint name="${prefix}left_finger_joint" type="revolute">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
@@ -143,15 +143,15 @@
       <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
     </joint>
 
-    <!-- ====================== TCP (punto de agarre) ====================== -->
+    <!-- ====================== TCP (grasp point) ====================== -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
-      <origin xyz="0 0 0.135" rpy="0 0 0"/> <!-- 135 mm desde la base según datasheet oficial -->
+      <origin xyz="0 0 0.135" rpy="0 0 0"/> <!-- 135 mm from the base according to official datasheet -->
     </joint>
 
-    <!-- ====================== Transmission para ros2_control ====================== -->
+    <!-- ====================== Transmission for ros2_control ====================== -->
     <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
 
    

@@ -29,8 +29,8 @@
       </collision>
     </link>
 
-    <!-- ====================== Dedos individuales ====================== -->
-    <!-- Dedo izquierdo (120° a la izquierda) -->
+    <!-- ====================== Individual fingers ====================== -->
+    <!-- Left finger (120° to the left) -->
     <link name="${prefix}left_finger_link">
       <inertial>
         <origin xyz="0.026 -0.015 0" rpy="${-pi/2} 0 0"/>
@@ -52,7 +52,7 @@
       </collision>
     </link>
 
-    <!-- Dedo derecho (120° a la derecha) -->
+    <!-- Right finger (120° to the right) -->
     <link name="${prefix}right_finger_link">
       <inertial>
         <origin xyz="-0.026 -0.015 -0.15" rpy="${-pi/2} 0 0"/>
@@ -74,7 +74,7 @@
       </collision>
     </link>
 
-    <!-- Dedo central (hacia abajo) -->
+    <!-- Center finger (downward) -->
     <link name="${prefix}center_finger_link">
       <inertial>
         <origin xyz="0 +0.03 0 " rpy="${-pi/2} 0 0"/>
@@ -96,7 +96,7 @@
       </collision>
     </link>
 
-    <!-- ====================== Mock link para el joint principal ====================== -->
+    <!-- ====================== Mock link for the main joint ====================== -->
     <link name="${prefix}finger_width_mock_link">
       <inertial>
         <mass value="0.001"/>
@@ -104,7 +104,7 @@
       </inertial>
     </link>
 
-    <!-- ====================== Joint principal de control (0 a 150 mm) ====================== -->
+    <!-- ====================== Main control joint (0 to 150 mm) ====================== -->
     <joint name="${prefix}finger_width" type="revolute">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
@@ -114,7 +114,7 @@
     </joint>
 
 
-    <!-- ====================== Eje Z visual (debug) ====================== -->
+    <!-- ====================== Visual Z axis (debug) ====================== -->
    
     <!--
     <link name="${prefix}z_axis_visual_link2">
@@ -175,8 +175,8 @@
     -->
   
         
-    <!-- ====================== Joints de los dedos (mimic del principal) ====================== -->
-    <!-- Los tres dedos se mueven radialmente según el ancho (finger_width / 3 por dedo) -->
+    <!-- ====================== Finger joints (mimic from main) ====================== -->
+    <!-- The three fingers move radially according to the width (finger_width / 3 per finger) -->
   
     <joint name="${prefix}left_finger_joint" type="revolute">
       
@@ -212,7 +212,7 @@
       <mimic joint="${prefix}finger_width"  offset="0"/>
     </joint>
 
-    <!-- ====================== TCP (punto de agarre) ====================== -->
+    <!-- ====================== TCP (grasp point) ====================== -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
       <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -220,7 +220,7 @@
       <child link="${prefix}gripper_tcp"/>
     </joint>
 
-    <!-- ====================== Transmission para ROS Control ====================== -->
+    <!-- ====================== Transmission for ROS Control ====================== -->
     <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
 
   </xacro:macro>
