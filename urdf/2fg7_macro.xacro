@@ -14,16 +14,29 @@
         <inertia ixx="0.0005" ixy="0.0" ixz="0.0" iyy="0.0005" iyz="0.0" izz="0.0005"/>
       </inertial>
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="-1.570796 0 -1.570796"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/2fg7/visual/base_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/2fg7/visual/Quick_Changer_Robot_side_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="onrobot_silver"/>
+      </visual>
+      <visual>
+        <origin xyz="-0.05539 -0.14017 -0.28046" rpy="1.570796 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/2fg7/visual/official_base_onrobot.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="0 0 0" rpy="-1.570796 0 -1.570796"/>
         <geometry>
-          <box size="0.045 0.045 0.04"/>
+          <mesh filename="package://onrobot_description/meshes/2fg7/collision/Quick_Changer_Robot_side_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="-0.05539 -0.14017 -0.28046" rpy="1.570796 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/2fg7/collision/official_base_onrobot.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -36,16 +49,16 @@
         <inertia ixx="0.00005" ixy="0.0" ixz="0.0" iyy="0.00005" iyz="0.0" izz="0.00005"/>
       </inertial>
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="-0.05539 -0.14017 -0.28046" rpy="1.570796 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/2fg7/visual/left_finger_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/2fg7/visual/official_left_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="-0.05539 -0.14017 -0.28046" rpy="1.570796 0 0"/>
         <geometry>
-          <box size="0.008 0.025 0.06"/>
+          <mesh filename="package://onrobot_description/meshes/2fg7/collision/official_left_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -57,16 +70,16 @@
         <inertia ixx="0.00005" ixy="0.0" ixz="0.0" iyy="0.00005" iyz="0.0" izz="0.00005"/>
       </inertial>
       <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="-0.05539 -0.14017 -0.28046" rpy="1.570796 0 0"/>
         <geometry>
-          <mesh filename="package://onrobot_description/meshes/2fg7/visual/right_finger_link.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://onrobot_description/meshes/2fg7/visual/official_right_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="onrobot_silver"/>
       </visual>
       <collision>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <origin xyz="-0.05539 -0.14017 -0.28046" rpy="1.570796 0 0"/>
         <geometry>
-          <box size="0.008 0.025 0.06"/>
+          <mesh filename="package://onrobot_description/meshes/2fg7/collision/official_right_finger.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -85,17 +98,17 @@
 
     <!-- Left Finger Joint -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
-      <origin xyz="-0.035 0 0" rpy="0 0 0"/>
+      <origin xyz="-0.0302 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
-      <limit lower="0.0" upper="0.0175" effort="140" velocity="0.45"/>
+      <limit lower="-0.0175" upper="0.0" effort="140" velocity="0.45"/>
       <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
     </joint>
 
     <!-- Right Finger Joint -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
-      <origin xyz="0.035 0 0" rpy="0 0 0"/>
+      <origin xyz="0.0302 0 0" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
