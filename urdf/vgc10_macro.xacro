@@ -48,5 +48,34 @@
       <child link="${prefix}gripper_tcp"/>
     </joint>
 
+    <!-- Virtual links and joints for dual vacuum channels (Channel A and Channel B) -->
+    <link name="${prefix}vacuum_channel_a_mock_link">
+      <inertial>
+        <mass value="1e-9"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}vacuum_channel_a" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}onrobot_base_link"/>
+      <child link="${prefix}vacuum_channel_a_mock_link"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="0.0" upper="1.0" velocity="1.0" effort="100.0"/>
+    </joint>
+
+    <link name="${prefix}vacuum_channel_b_mock_link">
+      <inertial>
+        <mass value="1e-9"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}vacuum_channel_b" type="prismatic">
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <parent link="${prefix}onrobot_base_link"/>
+      <child link="${prefix}vacuum_channel_b_mock_link"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="0.0" upper="1.0" velocity="1.0" effort="100.0"/>
+    </joint>
+
   </xacro:macro>
 </robot>

@@ -78,5 +78,39 @@
       </ros2_control>
     </xacro:if>
 
+    <!-- VGC10 Vacuum Gripper -->
+    <xacro:if value="${onrobot_type == 'vgc10'}">
+      <ros2_control name="OnRobotGripper" type="actuator">
+        <hardware>
+          <xacro:if value="${use_mock_hardware}">
+            <plugin>mock_components/GenericSystem</plugin>
+          </xacro:if>
+          <xacro:unless value="${use_mock_hardware}">
+            <plugin>onrobot_driver::VGC10HardwareInterface</plugin>
+            <param name="onrobot_type">${onrobot_type}</param>
+            <param name="prefix">${prefix}</param>
+            <param name="connection_type">${connection_type}</param>
+            <param name="device">${device}</param>
+            <param name="ip_address">${ip_address}</param>
+            <param name="port">${port}</param>
+            <param name="device_address">${device_address}</param>
+            <param name="use_fake_hardware">${use_fake_hardware}</param>
+          </xacro:unless>
+        </hardware>
+
+        <!-- Independent Dual Vacuum Channels -->
+        <joint name="${prefix}vacuum_channel_a">
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="effort"/>
+        </joint>
+        <joint name="${prefix}vacuum_channel_b">
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="effort"/>
+        </joint>
+      </ros2_control>
+    </xacro:if>
+
   </xacro:macro>
 </robot>
