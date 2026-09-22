@@ -5,7 +5,7 @@ A ROS2 URDF description package for OnRobot grippers. This package provides XACR
 ## Contents
 
 - Package manifest and build: [CMakeLists.txt](CMakeLists.txt)
-- Launch files: [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py), [launch/view_onrobot.launch_bk.py](launch/view_onrobot.launch_bk.py)
+- Launch files: [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py)
 - URDF / XACRO: [urdf/onrobot_macro.xacro](urdf/onrobot_macro.xacro), [urdf/onrobot.urdf.xacro](urdf/onrobot.urdf.xacro)
 - RViz config: [rviz/view_onrobot.rviz](rviz/view_onrobot.rviz)
 - Meshes: [meshes/](meshes/)
@@ -13,11 +13,10 @@ A ROS2 URDF description package for OnRobot grippers. This package provides XACR
 
 ## Supported gripper types
 
-The launch file supports these gripper types:
-- rg2
-- rg6
-- 2fg7
-- 3fg15
+The package supports the following OnRobot models:
+- `2fg7`: 2FG7 parallel gripper
+- `3fg15`: 3FG15 three-finger centric gripper
+- `vgc10`: VGC10 vacuum gripper
 
 (See the `onrobot_type` launch argument in [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py).)
 
@@ -46,15 +45,15 @@ The launch file supports these gripper types:
 Launch RViz2 with an example gripper:
 
 ```sh
-ros2 launch onrobot_description view_onrobot.launch.py onrobot_type:=rg2
+ros2 launch onrobot_description view_onrobot.launch.py onrobot_type:=2fg7
 ```
 
 This launch:
 - Generates a URDF from [urdf/onrobot_macro.xacro](urdf/onrobot_macro.xacro) via xacro,
-- Starts `joint_state_publisher_gui` and `robot_state_publisher`,
+- Starts `joint_state_publisher_gui` (or `joint_state_publisher` if `gui:=false`) and `robot_state_publisher`,
 - Opens RViz2 with [rviz/view_onrobot.rviz](rviz/view_onrobot.rviz).
 
-Use `onrobot_type:=rg2|rg6|2fg7|3fg15`. `prefix:=` and `ns:=` are available for multi-robot setups (see [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py)).
+Use `onrobot_type:=2fg7|3fg15|vgc10`. `prefix:=`, `ns:=`, and `gui:=true|false` are available for headless or multi-robot setups.
 
 ## How to use the XACRO macro
 
@@ -77,7 +76,7 @@ An example usage is provided in [urdf/onrobot.urdf.xacro](urdf/onrobot.urdf.xacr
 ## Development notes
 
 - Launch files call `xacro` via a Command substitution to generate `robot_description` at runtime. See [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py).
-- A backup variant of the launch file is present at [launch/view_onrobot.launch_bk.py](launch/view_onrobot.launch_bk.py).
+- For mock simulation without physical hardware drivers, pass `use_mock_hardware:=true` to utilize standard `mock_components/GenericSystem` in ROS 2 Humble.
 
 ## License
 

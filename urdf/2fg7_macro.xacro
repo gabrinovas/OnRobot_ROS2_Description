@@ -85,7 +85,12 @@
     </link>
 
     <!-- Dummy link for the main control joint -->
-    <link name="${prefix}finger_width_mock_link"/>
+    <link name="${prefix}finger_width_mock_link">
+      <inertial>
+        <mass value="1e-9"/>
+        <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+      </inertial>
+    </link>
     
     <!-- Main control joint (finger_width) -->
     <joint name="${prefix}finger_width" type="prismatic">
@@ -103,7 +108,7 @@
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
       <limit lower="-0.0175" upper="0.0" effort="140" velocity="0.45"/>
-      <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
+      <mimic joint="${prefix}finger_width" multiplier="-0.5" offset="0.0175"/>
     </joint>
 
     <!-- Right Finger Joint -->
@@ -113,7 +118,7 @@
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
       <limit lower="-0.0175" upper="0.0" effort="140" velocity="0.45"/>
-      <mimic joint="${prefix}finger_width" multiplier="0.5" offset="0"/>
+      <mimic joint="${prefix}finger_width" multiplier="-0.5" offset="0.0175"/>
     </joint>
 
     <!-- TCP Link -->
@@ -123,9 +128,6 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
     </joint>
-
-    <!-- Transmission for ROS Control -->
-    <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
 
   </xacro:macro>
 </robot>

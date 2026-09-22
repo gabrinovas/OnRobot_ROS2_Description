@@ -1,11 +1,10 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="onrobot">
     <!-- Arguments -->
-    <xacro:arg name="onrobot_type" default="rg2"/>
+    <xacro:arg name="onrobot_type" default="2fg7"/>
     <xacro:arg name="prefix" default=""/>
-    <xacro:arg name="name" default="onrobot"/>
-    <xacro:arg name="sim_gazebo" default="false"/>
     <xacro:arg name="use_fake_hardware" default="false"/>
+    <xacro:arg name="use_mock_hardware" default="false"/>
     <xacro:arg name="connection_type" default="serial"/>
     <xacro:arg name="device" default="/tmp/ttyUR"/>
     <xacro:arg name="ip_address" default="192.168.1.1"/>
@@ -18,8 +17,8 @@
     <xacro:onrobot
         onrobot_type="$(arg onrobot_type)"
         prefix="$(arg prefix)"
-        sim_gazebo="$(arg sim_gazebo)"
         use_fake_hardware="$(arg use_fake_hardware)"
+        use_mock_hardware="$(arg use_mock_hardware)"
         connection_type="$(arg connection_type)"
         device="$(arg device)"
         ip_address="$(arg ip_address)"

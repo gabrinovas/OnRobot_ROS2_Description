@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
+
+  <xacro:macro name="onrobot_vgc10" params="prefix onrobot_type:='vgc10'">
+
+    <!-- Base Link -->
+    <link name="${prefix}onrobot_base_link">
+      <inertial>
+        <origin xyz="0 0 0.045" rpy="0 0 0"/>
+        <mass value="0.8"/>
+        <inertia ixx="0.002" ixy="0.0" ixz="0.0" iyy="0.002" iyz="0.0" izz="0.002"/>
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/vgc10/visual/base_vgc.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="onrobot_silver"/>
+      </visual>
+      <visual>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/vgc10/visual/ventosa_15_mm.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="onrobot_black"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/vgc10/collision/base_vgc.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+      <collision>
+        <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://onrobot_description/meshes/vgc10/collision/ventosa_15_mm.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- Suction / TCP Link -->
+    <link name="${prefix}gripper_tcp"/>
+    <joint name="${prefix}tcp_joint" type="fixed">
+      <origin xyz="0 0 0.241" rpy="0 0 0"/>
+      <parent link="${prefix}onrobot_base_link"/>
+      <child link="${prefix}gripper_tcp"/>
+    </joint>
+
+  </xacro:macro>
+</robot>
