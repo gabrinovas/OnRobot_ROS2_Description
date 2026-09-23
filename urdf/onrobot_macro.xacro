@@ -74,6 +74,9 @@
           <command_interface name="position"/>
           <state_interface name="position"/>
           <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+          <state_interface name="grip_detected"/>
+          <state_interface name="busy"/>
         </joint>
       </ros2_control>
     </xacro:if>
@@ -102,12 +105,18 @@
         <joint name="${prefix}vacuum_channel_a">
           <command_interface name="position"/>
           <state_interface name="position"/>
+          <state_interface name="velocity"/>
           <state_interface name="effort"/>
+          <state_interface name="vacuum_level"/>
+          <state_interface name="pressure_kpa"/>
         </joint>
         <joint name="${prefix}vacuum_channel_b">
           <command_interface name="position"/>
           <state_interface name="position"/>
+          <state_interface name="velocity"/>
           <state_interface name="effort"/>
+          <state_interface name="vacuum_level"/>
+          <state_interface name="pressure_kpa"/>
         </joint>
       </ros2_control>
     </xacro:if>
