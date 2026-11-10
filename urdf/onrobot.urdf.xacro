@@ -9,6 +9,7 @@
     <xacro:arg name="device" default="/tmp/ttyUR"/>
     <xacro:arg name="ip_address" default="192.168.1.1"/>
     <xacro:arg name="port" default="502"/>
+    <xacro:arg name="timeout_ms" default="2000"/>
 
     <!-- Import the OnRobot macro -->
     <xacro:include filename="$(find onrobot_description)/urdf/onrobot_macro.xacro"/>
@@ -23,6 +24,7 @@
         device="$(arg device)"
         ip_address="$(arg ip_address)"
         port="$(arg port)"
+        timeout_ms="$(arg timeout_ms)"
     />
     
     <!-- Create link fixed to the world -->
