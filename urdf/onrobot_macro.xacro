@@ -13,6 +13,8 @@
       ip_address:=192.168.1.1
       port:=502
       device_address:=65
+      timeout_ms:=2000
+      include_ros2_control:=true
     ">
 
     <!-- ====================== 2FG7 ====================== -->
@@ -34,7 +36,9 @@
     </xacro:if>
 
     <!-- ====================== ROS2 Control (Humble) ====================== -->
-    <xacro:if value="${onrobot_type in ['2fg7', '3fg15']}">
+    <!-- include_ros2_control:=false omits the <ros2_control> block, e.g. when the gripper runs in its own
+         controller manager (/onrobot) and must not be loaded into the UR controller manager. -->
+    <xacro:if value="${include_ros2_control and onrobot_type in ['2fg7', '3fg15']}">
       <ros2_control name="OnRobotGripper" type="actuator">
         <hardware>
           <xacro:if value="${use_mock_hardware}">
@@ -51,6 +55,7 @@
               <param name="ip_address">${ip_address}</param>
               <param name="port">${port}</param>
               <param name="device_address">${device_address}</param>
+              <param name="timeout_ms">${timeout_ms}</param>
               <param name="use_fake_hardware">${use_fake_hardware}</param>
             </xacro:if>
 
@@ -64,6 +69,7 @@
               <param name="ip_address">${ip_address}</param>
               <param name="port">${port}</param>
               <param name="device_address">${device_address}</param>
+              <param name="timeout_ms">${timeout_ms}</param>
               <param name="use_fake_hardware">${use_fake_hardware}</param>
             </xacro:if>
           </xacro:unless>
@@ -74,12 +80,15 @@
           <command_interface name="position"/>
           <state_interface name="position"/>
           <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+          <state_interface name="grip_detected"/>
+          <state_interface name="busy"/>
         </joint>
       </ros2_control>
     </xacro:if>
 
     <!-- VGC10 Vacuum Gripper -->
-    <xacro:if value="${onrobot_type == 'vgc10'}">
+    <xacro:if value="${include_ros2_control and onrobot_type == 'vgc10'}">
       <ros2_control name="OnRobotGripper" type="actuator">
         <hardware>
           <xacro:if value="${use_mock_hardware}">
@@ -94,6 +103,7 @@
             <param name="ip_address">${ip_address}</param>
             <param name="port">${port}</param>
             <param name="device_address">${device_address}</param>
+              <param name="timeout_ms">${timeout_ms}</param>
             <param name="use_fake_hardware">${use_fake_hardware}</param>
           </xacro:unless>
         </hardware>
@@ -102,12 +112,18 @@
         <joint name="${prefix}vacuum_channel_a">
           <command_interface name="position"/>
           <state_interface name="position"/>
+          <state_interface name="velocity"/>
           <state_interface name="effort"/>
+          <state_interface name="vacuum_level"/>
+          <state_interface name="pressure_kpa"/>
         </joint>
         <joint name="${prefix}vacuum_channel_b">
           <command_interface name="position"/>
           <state_interface name="position"/>
+          <state_interface name="velocity"/>
           <state_interface name="effort"/>
+          <state_interface name="vacuum_level"/>
+          <state_interface name="pressure_kpa"/>
         </joint>
       </ros2_control>
     </xacro:if>

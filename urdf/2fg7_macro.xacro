@@ -98,27 +98,27 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.035" upper="0.07" velocity="0.45" effort="140"/>
+      <limit lower="0.035" upper="0.073" velocity="0.45" effort="140"/>
     </joint>
 
     <!-- Left Finger Joint -->
     <joint name="${prefix}left_finger_joint" type="prismatic">
-      <origin xyz="-0.0302 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 3.141593"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
-      <limit lower="-0.0175" upper="0.0" effort="140" velocity="0.45"/>
-      <mimic joint="${prefix}finger_width" multiplier="-0.5" offset="0.0175"/>
+      <limit lower="-0.0154" upper="0.0036" effort="140" velocity="0.45"/>
+      <mimic joint="${prefix}finger_width" multiplier="0.5" offset="-0.0329"/>
     </joint>
 
     <!-- Right Finger Joint -->
     <joint name="${prefix}right_finger_joint" type="prismatic">
-      <origin xyz="0.0302 0 0" rpy="0 0 0"/>
+      <origin xyz="0 0 0" rpy="0 0 3.141593"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
-      <limit lower="-0.0175" upper="0.0" effort="140" velocity="0.45"/>
-      <mimic joint="${prefix}finger_width" multiplier="-0.5" offset="0.0175"/>
+      <limit lower="-0.0154" upper="0.0036" effort="140" velocity="0.45"/>
+      <mimic joint="${prefix}finger_width" multiplier="0.5" offset="-0.0329"/>
     </joint>
 
     <!-- TCP Link -->
