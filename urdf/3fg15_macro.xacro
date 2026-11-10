@@ -151,10 +151,5 @@
       <origin xyz="0 0 0.135" rpy="0 0 0"/> <!-- 135 mm from the base according to official datasheet -->
     </joint>
 
-    <!-- ====================== Transmission for ros2_control ====================== -->
-    <xacro:transmission_macro prefix="${prefix}" joint_name="finger_width"/>
-
-   
-
   </xacro:macro>
 </robot>

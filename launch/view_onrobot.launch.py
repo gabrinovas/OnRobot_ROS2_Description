@@ -1,34 +1,37 @@
 #!/usr/bin/env python3
-"""
-Filename: view_onrobot.launch.py
-Author: Tony Le
-Description: 
-    A launch file to visualise the OnRobot URDF.
+# Copyright 2026 Tony Le, Gabriel Novas
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
 
-License: MIT License
-Contact: tonyle98@outlook.com
-"""
+"""Launch file to visualise the OnRobot URDF."""
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 
+
 def launch_setup(context, *args, **kwargs):
     description_file = "onrobot.urdf.xacro"
-    
+
     description_package = LaunchConfiguration("description_package")
     onrobot_type = LaunchConfiguration("onrobot_type")
     prefix = LaunchConfiguration("prefix")
     ns = LaunchConfiguration("ns")
+    gui = LaunchConfiguration("gui")
 
     robot_description_content = Command(
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare(description_package), "urdf", description_file]),
+            PathJoinSubstitution(
+                [FindPackageShare(description_package), "urdf", description_file]
+            ),
             " ",
             "onrobot_type:=",
             onrobot_type,
@@ -36,10 +39,7 @@ def launch_setup(context, *args, **kwargs):
             "prefix:=",
             prefix,
             " ",
-            "name:=",
-            "onrobot",
-            " ",
-            "use_fake_hardware:=true",  # For visualization only
+            "use_mock_hardware:=true",
             " ",
         ]
     )
@@ -51,12 +51,21 @@ def launch_setup(context, *args, **kwargs):
         [FindPackageShare(description_package), "rviz", "view_onrobot.rviz"]
     )
 
-    joint_state_publisher_node = Node(
+    joint_state_publisher_gui_node = Node(
         namespace=ns,
         package="joint_state_publisher_gui",
         executable="joint_state_publisher_gui",
         name="joint_state_publisher_gui",
         output="screen",
+        condition=IfCondition(gui),
+    )
+    joint_state_publisher_node = Node(
+        namespace=ns,
+        package="joint_state_publisher",
+        executable="joint_state_publisher",
+        name="joint_state_publisher",
+        output="screen",
+        condition=UnlessCondition(gui),
     )
     robot_state_publisher_node = Node(
         namespace=ns,
@@ -74,7 +83,13 @@ def launch_setup(context, *args, **kwargs):
         arguments=["-d", rviz_config_file],
     )
 
-    return [joint_state_publisher_node, robot_state_publisher_node, rviz_node]
+    return [
+        joint_state_publisher_gui_node,
+        joint_state_publisher_node,
+        robot_state_publisher_node,
+        rviz_node,
+    ]
+
 
 def generate_launch_description():
     declared_arguments = []
@@ -83,29 +98,37 @@ def generate_launch_description():
             "onrobot_type",
             default_value="2fg7",
             description="OnRobot type to load.",
-            choices=["rg2", "rg6", "2fg7", "3fg15"]
+            choices=["2fg7", "3fg15", "vgc10"],
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             "description_package",
             default_value="onrobot_description",
-            description="Package with the OnRobot URDF/XACRO files."
+            description="Package with the OnRobot URDF/XACRO files.",
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             "prefix",
             default_value='""',
-            description="Prefix for joint names (useful for multi-robot setups)."
+            description="Prefix for joint names (useful for multi-robot setups).",
         )
     )
     declared_arguments.append(
         DeclareLaunchArgument(
             "ns",
             default_value="onrobot",
-            description="Namespace for the nodes. Useful for separate gripper and robot control setups."
+            description="Namespace for the nodes.",
         )
     )
-    
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "gui",
+            default_value="true",
+            description="Start joint_state_publisher_gui (true) or joint_state_publisher (false).",
+            choices=["true", "false"],
+        )
+    )
+
     return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])
