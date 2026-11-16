@@ -1,0 +1,18 @@
+# OnRobot VGC10 vacuum gripper: what the gripper is.
+# Read by this package (geometry), by onrobot_driver (hardware) and by every launch file that lists the grippers.
+
+kind: vacuum                         # finger: one finger_width joint. vacuum: one joint per vacuum channel
+geometry: urdf/grippers/vgc10.xacro  # relative to this package
+tcp_offset: 0.241                    # m, from onrobot_base_link to gripper_tcp
+
+joints:                              # one virtual joint per vacuum channel: 0 = released, 1 = full vacuum
+  vacuum_channel_a:
+    lower: 0.0
+    upper: 1.0
+    velocity: 1.0
+    effort: 100.0
+  vacuum_channel_b:
+    lower: 0.0
+    upper: 1.0
+    velocity: 1.0
+    effort: 100.0

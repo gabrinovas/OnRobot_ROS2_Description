@@ -1,89 +1,80 @@
 # OnRobot_ROS2_Description
 
-A ROS2 URDF description package for OnRobot grippers. This package provides XACRO macros, meshes, an RViz configuration and a simple launch file to visualise the gripper models.
+ROS 2 description of the OnRobot grippers: geometry (XACRO and meshes), one data file per gripper, an RViz
+configuration and a launch file to look at a gripper.
 
-## Contents
+The package describes geometry only. The `ros2_control` hardware of the grippers is described in
+[OnRobot_ROS2_Driver](https://github.com/gabrinovas/OnRobot_ROS2_Driver).
 
-- Package manifest and build: [CMakeLists.txt](CMakeLists.txt)
-- Launch files: [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py)
-- URDF / XACRO: [urdf/onrobot_macro.xacro](urdf/onrobot_macro.xacro), [urdf/onrobot.urdf.xacro](urdf/onrobot.urdf.xacro)
-- RViz config: [rviz/view_onrobot.rviz](rviz/view_onrobot.rviz)
-- Meshes: [meshes/](meshes/)
-- License: [LICENSE](LICENSE)
+## Grippers
 
-## Supported gripper types
+| Name | Gripper | Kind |
+|---|---|---|
+| `2fg7` | 2FG7 parallel gripper | finger |
+| `3fg15` | 3FG15 three-finger centric gripper | finger |
+| `vgc10` | VGC10 vacuum gripper | vacuum |
 
-The package supports the following OnRobot models:
-- `2fg7`: 2FG7 parallel gripper
-- `3fg15`: 3FG15 three-finger centric gripper
-- `vgc10`: VGC10 vacuum gripper
+Every gripper is one file in [config/grippers](config/grippers): its kind, its commanded joints with their
+limits, the distance to its tool centre point and the file with its geometry. Nothing else in the package names
+a gripper, so the list above is simply the list of files in that folder.
 
-(See the `onrobot_type` launch argument in [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py).)
+### Adding a gripper
 
-## Installation
+1. `config/grippers/<name>.yaml`, like the existing ones.
+2. `urdf/grippers/<name>.xacro`, with a macro called `onrobot_gripper_geometry` that takes `prefix` and
+   `gripper` (the content of the YAML file) and creates `${prefix}onrobot_base_link` and `${prefix}gripper_tcp`.
+3. Its meshes in `meshes/<name>/`.
 
-1. Clone into your workspace `src` directory:
+The launch files of this package, of the driver and of the UR + OnRobot packages then offer the new name.
 
-   ```sh
-   git clone https://github.com/tonydle/OnRobot_ROS2_Description.git src/onrobot_description
-   ```
+## Use
 
-2. Build with colcon (symlink install recommended for easier development):
-
-   ```sh
-   colcon build --symlink-install
-   ```
-
-3. Source the workspace:
-
-   ```sh
-   source install/setup.bash
-   ```
-
-## Quick test (visualisation)
-
-Launch RViz2 with an example gripper:
+Build and source the workspace, then:
 
 ```sh
-ros2 launch onrobot_description view_onrobot.launch.py onrobot_type:=2fg7
+ros2 launch onrobot_description view_onrobot.launch.py onrobot_type:=3fg15
 ```
 
-This launch:
-- Generates a URDF from [urdf/onrobot_macro.xacro](urdf/onrobot_macro.xacro) via xacro,
-- Starts `joint_state_publisher_gui` (or `joint_state_publisher` if `gui:=false`) and `robot_state_publisher`,
-- Opens RViz2 with [rviz/view_onrobot.rviz](rviz/view_onrobot.rviz).
+| Argument | Meaning |
+|---|---|
+| `onrobot_type` | gripper to show, one of the names above |
+| `prefix` | prefix of the link and joint names |
+| `ns` | namespace of the nodes |
+| `gui` | `true`: move the joints from a window; `false`: publish them fixed |
 
-Use `onrobot_type:=2fg7|3fg15|vgc10`. `prefix:=`, `ns:=`, and `gui:=true|false` are available for headless or multi-robot setups.
+The values used when an argument is not given are in
+[config/onrobot_description.yaml](config/onrobot_description.yaml), not in the launch file.
 
-## How to use the XACRO macro
-
-Include the macro in your robot URDF and attach the `onrobot_base_link` where required:
+### In another description
 
 ```xml
 <xacro:include filename="$(find onrobot_description)/urdf/onrobot_macro.xacro"/>
-<xacro:onrobot onrobot_type="$(arg onrobot_type)" prefix="$(arg prefix)"/>
-...
-<link name="world" />
-<joint name="$(arg prefix)onrobot_base_link_joint" type="fixed">
-  <origin xyz="0 0 0" rpy="0 0 0"/>
-  <parent link="world"/>
-  <child link="$(arg prefix)onrobot_base_link"/>
-</joint>
+<xacro:onrobot onrobot_type="2fg7" prefix=""/>
 ```
 
-An example usage is provided in [urdf/onrobot.urdf.xacro](urdf/onrobot.urdf.xacro).
+The macro creates the gripper hanging from `${prefix}onrobot_base_link`; attach that link to your robot.
+[urdf/onrobot.urdf.xacro](urdf/onrobot.urdf.xacro) is a complete example. Both parameters are required.
 
-## Development notes
+## Python helpers
 
-- Launch files call `xacro` via a Command substitution to generate `robot_description` at runtime. See [launch/view_onrobot.launch.py](launch/view_onrobot.launch.py).
-- For mock simulation without physical hardware drivers, pass `use_mock_hardware:=true` to utilize standard `mock_components/GenericSystem` in ROS 2 Humble.
+The package installs a small Python module used by the launch files of the three repositories:
+
+| Module | What it gives |
+|---|---|
+| `onrobot_description.config_loader` | `load_config`, `require`, `package_file`: YAML loading that stops with a `[Fail-Fast]` error naming the missing file or key |
+| `onrobot_description.grippers` | `gripper_names()`, `load_gripper(name)` |
+| `onrobot_description.launch_arguments` | `declare_arguments`: launch arguments declared from a table of a YAML file |
+| `onrobot_description.source_rules` | the checks every package runs on its own files: at most 200 lines, ASCII only |
+
+## Meshes
+
+The meshes in `meshes/` are simplified versions (visual within 0.5 mm of the original, collision within 2 mm).
+The originals are kept in `meshes_original/`, which is not installed; its README lists every mesh.
 
 ## License
 
-This project is released under the MIT License — see [LICENSE](LICENSE). The meshes and original xacros are derived from the [Osaka-University-Harada-Laboratory/onrobot](https://github.com/Osaka-University-Harada-Laboratory/onrobot) project, also MIT-licensed.
+MIT, see [LICENSE](LICENSE). The meshes and the original XACRO files are derived from
+[Osaka-University-Harada-Laboratory/onrobot](https://github.com/Osaka-University-Harada-Laboratory/onrobot),
+also under the MIT license.
 
-## Author / Contact
-
-The original mesh files and xacros are derived from [Osaka-University-Harada-Laboratory/onrobot](https://github.com/Osaka-University-Harada-Laboratory/onrobot), which is licensed under the MIT License. \
-Tony Le — https://github.com/tonydle \
-Gabriel Novas — https://github.com/gabrinovas
+Tony Le (https://github.com/tonydle), Gabriel Novas (https://github.com/gabrinovas).

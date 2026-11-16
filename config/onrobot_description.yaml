@@ -1,0 +1,20 @@
+# Values of the onrobot_description package. Launch arguments given on the command line override them.
+
+view_launch_arguments:               # arguments of launch/view_onrobot.launch.py
+  onrobot_type:
+    default: 2fg7
+    description: OnRobot gripper to show (one of the files in config/grippers).
+  prefix:
+    default: ''
+    description: Prefix of the link and joint names (for setups with several robots).
+  ns:
+    default: onrobot
+    description: Namespace of the nodes.
+  gui:
+    default: true
+    description: Move the joints with joint_state_publisher_gui (true) or publish them fixed (false).
+    choices: ['true', 'false']
+
+view:
+  description_file: urdf/onrobot.urdf.xacro   # relative to this package
+  rviz_config: rviz/view_onrobot.rviz         # relative to this package

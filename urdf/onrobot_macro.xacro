@@ -1,132 +1,15 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro">
 
-  <!-- Main macro for all OnRobot grippers -->
-  <xacro:macro name="onrobot"
-    params="
-      onrobot_type
-      prefix:=''
-      use_fake_hardware:=false
-      use_mock_hardware:=false
-      connection_type:=tcp
-      device:=/tmp/ttyUR
-      ip_address:=192.168.1.1
-      port:=502
-      device_address:=65
-      timeout_ms:=2000
-      include_ros2_control:=true
-    ">
-
-    <!-- ====================== 2FG7 ====================== -->
-    <xacro:if value="${onrobot_type == '2fg7'}">
-      <xacro:include filename="$(find onrobot_description)/urdf/2fg7_macro.xacro"/>
-      <xacro:onrobot_2fg7 prefix="${prefix}" onrobot_type="${onrobot_type}"/>
-    </xacro:if>
-
-    <!-- ====================== 3FG15 ====================== -->
-    <xacro:if value="${onrobot_type == '3fg15'}">
-      <xacro:include filename="$(find onrobot_description)/urdf/3fg15_macro.xacro"/>
-      <xacro:onrobot_3fg15 prefix="${prefix}"/>
-    </xacro:if>
-
-    <!-- ====================== VGC10 ====================== -->
-    <xacro:if value="${onrobot_type == 'vgc10'}">
-      <xacro:include filename="$(find onrobot_description)/urdf/vgc10_macro.xacro"/>
-      <xacro:onrobot_vgc10 prefix="${prefix}"/>
-    </xacro:if>
-
-    <!-- ====================== ROS2 Control (Humble) ====================== -->
-    <!-- include_ros2_control:=false omits the <ros2_control> block, e.g. when the gripper runs in its own
-         controller manager (/onrobot) and must not be loaded into the UR controller manager. -->
-    <xacro:if value="${include_ros2_control and onrobot_type in ['2fg7', '3fg15']}">
-      <ros2_control name="OnRobotGripper" type="actuator">
-        <hardware>
-          <xacro:if value="${use_mock_hardware}">
-            <plugin>mock_components/GenericSystem</plugin>
-          </xacro:if>
-          <xacro:unless value="${use_mock_hardware}">
-            <!-- 2FG7 - TwoFG Hardware Interface -->
-            <xacro:if value="${onrobot_type == '2fg7'}">
-              <plugin>onrobot_driver::TwoFGHardwareInterface</plugin>
-              <param name="onrobot_type">${onrobot_type}</param>
-              <param name="prefix">${prefix}</param>
-              <param name="connection_type">${connection_type}</param>
-              <param name="device">${device}</param>
-              <param name="ip_address">${ip_address}</param>
-              <param name="port">${port}</param>
-              <param name="device_address">${device_address}</param>
-              <param name="timeout_ms">${timeout_ms}</param>
-              <param name="use_fake_hardware">${use_fake_hardware}</param>
-            </xacro:if>
-
-            <!-- 3FG15 - ThreeFG Hardware Interface -->
-            <xacro:if value="${onrobot_type == '3fg15'}">
-              <plugin>onrobot_driver::ThreeFGHardwareInterface</plugin>
-              <param name="onrobot_type">${onrobot_type}</param>
-              <param name="prefix">${prefix}</param>
-              <param name="connection_type">${connection_type}</param>
-              <param name="device">${device}</param>
-              <param name="ip_address">${ip_address}</param>
-              <param name="port">${port}</param>
-              <param name="device_address">${device_address}</param>
-              <param name="timeout_ms">${timeout_ms}</param>
-              <param name="use_fake_hardware">${use_fake_hardware}</param>
-            </xacro:if>
-          </xacro:unless>
-        </hardware>
-
-        <!-- Joint configuration for actuated grippers -->
-        <joint name="${prefix}finger_width">
-          <command_interface name="position"/>
-          <state_interface name="position"/>
-          <state_interface name="velocity"/>
-          <state_interface name="effort"/>
-          <state_interface name="grip_detected"/>
-          <state_interface name="busy"/>
-        </joint>
-      </ros2_control>
-    </xacro:if>
-
-    <!-- VGC10 Vacuum Gripper -->
-    <xacro:if value="${include_ros2_control and onrobot_type == 'vgc10'}">
-      <ros2_control name="OnRobotGripper" type="actuator">
-        <hardware>
-          <xacro:if value="${use_mock_hardware}">
-            <plugin>mock_components/GenericSystem</plugin>
-          </xacro:if>
-          <xacro:unless value="${use_mock_hardware}">
-            <plugin>onrobot_driver::VGC10HardwareInterface</plugin>
-            <param name="onrobot_type">${onrobot_type}</param>
-            <param name="prefix">${prefix}</param>
-            <param name="connection_type">${connection_type}</param>
-            <param name="device">${device}</param>
-            <param name="ip_address">${ip_address}</param>
-            <param name="port">${port}</param>
-            <param name="device_address">${device_address}</param>
-              <param name="timeout_ms">${timeout_ms}</param>
-            <param name="use_fake_hardware">${use_fake_hardware}</param>
-          </xacro:unless>
-        </hardware>
-
-        <!-- Independent Dual Vacuum Channels -->
-        <joint name="${prefix}vacuum_channel_a">
-          <command_interface name="position"/>
-          <state_interface name="position"/>
-          <state_interface name="velocity"/>
-          <state_interface name="effort"/>
-          <state_interface name="vacuum_level"/>
-          <state_interface name="pressure_kpa"/>
-        </joint>
-        <joint name="${prefix}vacuum_channel_b">
-          <command_interface name="position"/>
-          <state_interface name="position"/>
-          <state_interface name="velocity"/>
-          <state_interface name="effort"/>
-          <state_interface name="vacuum_level"/>
-          <state_interface name="pressure_kpa"/>
-        </joint>
-      </ros2_control>
-    </xacro:if>
-
+  <!-- Geometry of one OnRobot gripper: links, joints and the gripper_tcp frame, hanging from
+       ${prefix}onrobot_base_link. What the gripper is comes from config/grippers/<onrobot_type>.yaml, so a
+       new gripper needs that file and its geometry file and no change here.
+       The ros2_control hardware of the gripper is described in the onrobot_driver package. -->
+  <xacro:macro name="onrobot" params="onrobot_type prefix">
+    <xacro:property name="gripper"
+      value="${xacro.load_yaml('$(find onrobot_description)/config/grippers/' + onrobot_type + '.yaml')}"/>
+    <xacro:include filename="$(find onrobot_description)/${gripper['geometry']}"/>
+    <xacro:onrobot_gripper_geometry prefix="${prefix}" gripper="${gripper}"/>
   </xacro:macro>
+
 </robot>
