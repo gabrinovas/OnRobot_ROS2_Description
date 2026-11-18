@@ -1,0 +1,22 @@
+# OnRobot 2FG7 parallel gripper: what the gripper is.
+# Read by this package (geometry), by onrobot_driver (hardware) and by every launch file that lists the grippers.
+# Adding a gripper: one file like this one, its geometry file and its protocol class in onrobot_driver.
+
+kind: finger                         # finger: one finger_width joint. vacuum: one joint per vacuum channel
+geometry: urdf/grippers/2fg7.xacro   # relative to this package
+tcp_offset: 0.1386                   # m, from onrobot_base_link to gripper_tcp
+
+joints:
+  finger_width:                      # commanded joint: distance between the fingers, m
+    lower: 0.035
+    upper: 0.073
+    velocity: 0.45
+    effort: 140
+
+fingers:                             # the two drawn fingers, which follow finger_width
+  lower: -0.0154
+  upper: 0.0036
+  velocity: 0.45
+  effort: 140
+  mimic_multiplier: 0.5
+  mimic_offset: -0.0329

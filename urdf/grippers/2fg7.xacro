@@ -1,11 +1,13 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
-  <xacro:macro name="onrobot_2fg7" params="prefix onrobot_type:='2fg7'">
-    
+  <!-- Geometry of the 2FG7. gripper: the content of config/grippers/2fg7.yaml -->
+  <xacro:macro name="onrobot_gripper_geometry" params="prefix gripper">
+    <xacro:property name="width" value="${gripper['joints']['finger_width']}"/>
+    <xacro:property name="fingers" value="${gripper['fingers']}"/>
+
     <!-- Base Link -->
     <link name="${prefix}onrobot_base_link">
       <inertial>
@@ -98,7 +100,7 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}finger_width_mock_link"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.035" upper="0.073" velocity="0.45" effort="140"/>
+      <limit lower="${width['lower']}" upper="${width['upper']}" velocity="${width['velocity']}" effort="${width['effort']}"/>
     </joint>
 
     <!-- Left Finger Joint -->
@@ -107,8 +109,8 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}left_finger_link"/>
       <axis xyz="1 0 0"/>
-      <limit lower="-0.0154" upper="0.0036" effort="140" velocity="0.45"/>
-      <mimic joint="${prefix}finger_width" multiplier="0.5" offset="-0.0329"/>
+      <limit lower="${fingers['lower']}" upper="${fingers['upper']}" effort="${fingers['effort']}" velocity="${fingers['velocity']}"/>
+      <mimic joint="${prefix}finger_width" multiplier="${fingers['mimic_multiplier']}" offset="${fingers['mimic_offset']}"/>
     </joint>
 
     <!-- Right Finger Joint -->
@@ -117,14 +119,14 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}right_finger_link"/>
       <axis xyz="-1 0 0"/>
-      <limit lower="-0.0154" upper="0.0036" effort="140" velocity="0.45"/>
-      <mimic joint="${prefix}finger_width" multiplier="0.5" offset="-0.0329"/>
+      <limit lower="${fingers['lower']}" upper="${fingers['upper']}" effort="${fingers['effort']}" velocity="${fingers['velocity']}"/>
+      <mimic joint="${prefix}finger_width" multiplier="${fingers['mimic_multiplier']}" offset="${fingers['mimic_offset']}"/>
     </joint>
 
     <!-- TCP Link -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
-      <origin xyz="0 0 0.1386" rpy="0 0 0"/> <!-- 138.6 mm relative to tool0/base_link -->
+      <origin xyz="0 0 ${gripper['tcp_offset']}" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
     </joint>

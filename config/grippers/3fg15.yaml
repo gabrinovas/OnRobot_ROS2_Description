@@ -1,0 +1,20 @@
+# OnRobot 3FG15 three-finger gripper: what the gripper is.
+# Read by this package (geometry), by onrobot_driver (hardware) and by every launch file that lists the grippers.
+
+kind: finger                         # finger: one finger_width joint. vacuum: one joint per vacuum channel
+geometry: urdf/grippers/3fg15.xacro  # relative to this package
+tcp_offset: 0.135                    # m, from onrobot_base_link to gripper_tcp (official datasheet)
+
+joints:
+  finger_width:                      # commanded joint: grip diameter, m
+    lower: 0.0
+    upper: 0.150
+    velocity: 0.2
+    effort: 300
+    damping: 5.0
+    friction: 0.0
+
+fingers:                             # the three drawn fingers, which turn as finger_width changes
+  open_angle: 2.9                    # rad, drawn angle when fully open
+  velocity: 2.0
+  effort: 140

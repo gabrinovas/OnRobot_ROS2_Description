@@ -1,15 +1,17 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:include filename="$(find onrobot_description)/urdf/inc/common_utils.xacro" />
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
-  <xacro:macro name="onrobot_3fg15" params="prefix onrobot_type:='3fg15'">
+  <!-- Geometry of the 3FG15. gripper: the content of config/grippers/3fg15.yaml -->
+  <xacro:macro name="onrobot_gripper_geometry" params="prefix gripper">
+    <xacro:property name="width" value="${gripper['joints']['finger_width']}"/>
+    <xacro:property name="fingers" value="${gripper['fingers']}"/>
 
     <!-- ==================== Visual/real scale parameters ==================== -->
-    <xacro:property name="max_real_width"   value="0.150"/>   <!-- meters (max real width) -->
-    <xacro:property name="max_visual_angle" value="2.9"/>     <!-- radians when fully open -->
-    <xacro:property name="angle_multiplier" value="${-max_visual_angle / max_real_width}"/> <!-- ≈ -19.3333 -->
+    <xacro:property name="max_real_width"   value="${width['upper']}"/>   <!-- meters (max real width) -->
+    <xacro:property name="max_visual_angle" value="${fingers['open_angle']}"/>     <!-- radians when fully open -->
+    <xacro:property name="angle_multiplier" value="${-max_visual_angle / max_real_width}"/> <!-- about -19.3333 -->
 
     <!-- ====================== Base Link ====================== -->
     <link name="${prefix}onrobot_base_link">
@@ -111,8 +113,8 @@
       <child link="${prefix}finger_width_mock_link"/>
       <origin xyz="0 0 0" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_real_width}" effort="300" velocity="0.2"/>
-      <dynamics damping="5.0" friction="0.0"/>
+      <limit lower="${width['lower']}" upper="${max_real_width}" effort="${width['effort']}" velocity="${width['velocity']}"/>
+      <dynamics damping="${width['damping']}" friction="${width['friction']}"/>
     </joint>
 
     <!-- ====================== Finger joints (revolute + scaled mimic) ====================== -->
@@ -121,7 +123,7 @@
       <child link="${prefix}left_finger_link"/>
       <origin xyz="-0.026 0.015 0" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_visual_angle}" effort="140" velocity="2.0"/>
+      <limit lower="0.0" upper="${max_visual_angle}" effort="${fingers['effort']}" velocity="${fingers['velocity']}"/>
       <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
     </joint>
 
@@ -130,7 +132,7 @@
       <child link="${prefix}right_finger_link"/>
       <origin xyz="0.026 0.015 0.15" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_visual_angle}" effort="140" velocity="2.0"/>
+      <limit lower="0.0" upper="${max_visual_angle}" effort="${fingers['effort']}" velocity="${fingers['velocity']}"/>
       <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
     </joint>
 
@@ -139,7 +141,7 @@
       <child link="${prefix}center_finger_link"/>
       <origin xyz="0 -0.03 0" rpy="0 0 0"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="${max_visual_angle}" effort="140" velocity="2.0"/>
+      <limit lower="0.0" upper="${max_visual_angle}" effort="${fingers['effort']}" velocity="${fingers['velocity']}"/>
       <mimic joint="${prefix}finger_width" multiplier="${angle_multiplier}" offset="${max_visual_angle}"/>
     </joint>
 
@@ -148,7 +150,7 @@
     <joint name="${prefix}tcp_joint" type="fixed">
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
-      <origin xyz="0 0 0.135" rpy="0 0 0"/> <!-- 135 mm from the base according to official datasheet -->
+      <origin xyz="0 0 ${gripper['tcp_offset']}" rpy="0 0 0"/>
     </joint>
 
   </xacro:macro>

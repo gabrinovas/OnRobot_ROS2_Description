@@ -4,80 +4,67 @@
 # license that can be found in the LICENSE file or at
 # https://opensource.org/licenses/MIT.
 
-"""Tests for validating OnRobot XACRO and URDF generation."""
+"""Check that xacro generates a valid URDF for every gripper file."""
 
 import os
 import shutil
 import subprocess
 import tempfile
 import xml.etree.ElementTree as ET
+
+from onrobot_description.config_loader import package_file
+from onrobot_description.grippers import gripper_names, load_gripper
 import pytest
-from ament_index_python.packages import get_package_share_directory
 
 
-@pytest.fixture(scope="module")
-def package_share():
-    """Return share directory of the package."""
-    try:
-        return get_package_share_directory("onrobot_description")
-    except Exception:
-        return os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+def generate(gripper, *arguments):
+    """Run xacro on the standalone gripper description and return the finished process."""
+    description = package_file('onrobot_description', 'urdf', 'onrobot.urdf.xacro')
+    return subprocess.run(['xacro', description, f'onrobot_type:={gripper}', *arguments],
+                          stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
 
-@pytest.mark.parametrize("gripper_type", ["2fg7", "3fg15", "vgc10"])
-def test_xacro_generation_all_grippers(package_share, gripper_type):
-    """Verify that xacro generates valid URDF XML for each gripper model."""
-    urdf_xacro = os.path.join(package_share, "urdf", "onrobot.urdf.xacro")
-    assert os.path.exists(urdf_xacro), f"Missing {urdf_xacro}"
+@pytest.mark.parametrize('gripper', gripper_names())
+def test_every_gripper_generates_a_valid_urdf(gripper):
+    result = generate(gripper, 'prefix:=test_')
+    assert result.returncode == 0, f'xacro failed for {gripper}:\n{result.stderr}'
+    root = ET.fromstring(result.stdout)
+    assert root.tag == 'robot'
 
-    cmd = [
-        "xacro",
-        urdf_xacro,
-        f"onrobot_type:={gripper_type}",
-        "prefix:=test_",
-        "use_mock_hardware:=true",
-    ]
+    links = {element.attrib.get('name') for element in root.findall('link')}
+    assert {'test_onrobot_base_link', 'test_gripper_tcp'} <= links
 
-    result = subprocess.run(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
-    assert result.returncode == 0, (
-        f"xacro failed for {gripper_type}:\n{result.stderr}"
-    )
+    joints = {element.attrib.get('name') for element in root.findall('joint')}
+    for joint in load_gripper(gripper)['joints']:
+        assert f'test_{joint}' in joints, f'{gripper}: joint {joint} is not in the URDF'
 
-    xml_content = result.stdout
-    assert "<robot" in xml_content
-
-    # Validate XML syntax
-    root = ET.fromstring(xml_content)
-    assert root.tag == "robot"
-
-    # Verify base link and tcp link exist
-    link_names = [elem.attrib.get("name") for elem in root.findall("link")]
-    assert "test_onrobot_base_link" in link_names, (
-        f"Base link missing in {gripper_type}"
-    )
-    assert "test_gripper_tcp" in link_names, (
-        f"TCP link missing in {gripper_type}"
-    )
-
-    # Verify check_urdf if available
-    check_urdf_path = shutil.which("check_urdf")
-    if check_urdf_path:
-        with tempfile.NamedTemporaryFile(suffix=".urdf", mode="w", delete=False) as f:
-            f.write(xml_content)
-            temp_urdf_path = f.name
+    check_urdf = shutil.which('check_urdf')
+    if check_urdf:
+        with tempfile.NamedTemporaryFile(suffix='.urdf', mode='w', delete=False) as stream:
+            stream.write(result.stdout)
         try:
-            check_result = subprocess.run(
-                [check_urdf_path, temp_urdf_path],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            assert check_result.returncode == 0, (
-                f"check_urdf failed for {gripper_type}:\n"
-                f"{check_result.stderr}\n{check_result.stdout}"
-            )
+            checked = subprocess.run([check_urdf, stream.name], stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE, text=True)
+            assert checked.returncode == 0, (
+                f'check_urdf failed for {gripper}:\n{checked.stderr}\n{checked.stdout}')
         finally:
-            if os.path.exists(temp_urdf_path):
-                os.remove(temp_urdf_path)
+            os.remove(stream.name)
+
+
+def test_the_gripper_is_required():
+    description = package_file('onrobot_description', 'urdf', 'onrobot.urdf.xacro')
+    missing = subprocess.run(['xacro', description],
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    assert missing.returncode != 0
+    assert 'onrobot_type' in missing.stderr
+
+
+def test_the_prefix_is_empty_unless_given():
+    root = ET.fromstring(generate(gripper_names()[0]).stdout)
+    assert 'onrobot_base_link' in {element.attrib.get('name') for element in root.findall('link')}
+
+
+def test_an_unknown_gripper_is_an_error():
+    unknown = generate('no_such_gripper')
+    assert unknown.returncode != 0
+    assert 'no_such_gripper.yaml' in unknown.stderr

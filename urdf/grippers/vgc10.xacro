@@ -3,7 +3,10 @@
 
   <xacro:include filename="$(find onrobot_description)/urdf/inc/common_materials.xacro" />
 
-  <xacro:macro name="onrobot_vgc10" params="prefix onrobot_type:='vgc10'">
+  <!-- Geometry of the VGC10. gripper: the content of config/grippers/vgc10.yaml -->
+  <xacro:macro name="onrobot_gripper_geometry" params="prefix gripper">
+    <xacro:property name="channel_a" value="${gripper['joints']['vacuum_channel_a']}"/>
+    <xacro:property name="channel_b" value="${gripper['joints']['vacuum_channel_b']}"/>
 
     <!-- Base Link -->
     <link name="${prefix}onrobot_base_link">
@@ -43,7 +46,7 @@
     <!-- Suction / TCP Link -->
     <link name="${prefix}gripper_tcp"/>
     <joint name="${prefix}tcp_joint" type="fixed">
-      <origin xyz="0 0 0.241" rpy="0 0 0"/>
+      <origin xyz="0 0 ${gripper['tcp_offset']}" rpy="0 0 0"/>
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}gripper_tcp"/>
     </joint>
@@ -60,7 +63,7 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}vacuum_channel_a_mock_link"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="1.0" velocity="1.0" effort="100.0"/>
+      <limit lower="${channel_a['lower']}" upper="${channel_a['upper']}" velocity="${channel_a['velocity']}" effort="${channel_a['effort']}"/>
     </joint>
 
     <link name="${prefix}vacuum_channel_b_mock_link">
@@ -74,7 +77,7 @@
       <parent link="${prefix}onrobot_base_link"/>
       <child link="${prefix}vacuum_channel_b_mock_link"/>
       <axis xyz="0 0 1"/>
-      <limit lower="0.0" upper="1.0" velocity="1.0" effort="100.0"/>
+      <limit lower="${channel_b['lower']}" upper="${channel_b['upper']}" velocity="${channel_b['velocity']}" effort="${channel_b['effort']}"/>
     </joint>
 
   </xacro:macro>

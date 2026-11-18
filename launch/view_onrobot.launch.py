@@ -5,130 +5,49 @@
 # license that can be found in the LICENSE file or at
 # https://opensource.org/licenses/MIT.
 
-"""Launch file to visualise the OnRobot URDF."""
+"""Show one OnRobot gripper in RViz, with its joints driven from a small window."""
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, OpaqueFunction
+from launch.actions import OpaqueFunction
 from launch.conditions import IfCondition, UnlessCondition
-from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
+from launch.substitutions import Command, FindExecutable, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
-from launch_ros.substitutions import FindPackageShare
+from onrobot_description.config_loader import load_config, package_file, require
+from onrobot_description.grippers import gripper_names
+from onrobot_description.launch_arguments import declare_arguments
+
+PACKAGE = 'onrobot_description'
 
 
 def launch_setup(context, *args, **kwargs):
-    description_file = "onrobot.urdf.xacro"
+    config = load_config(package_file(PACKAGE, 'config', 'onrobot_description.yaml'))
+    namespace = LaunchConfiguration('ns')
+    gui = LaunchConfiguration('gui')
+    description_file = package_file(PACKAGE, require(config, 'view', 'description_file'))
+    rviz_config = package_file(PACKAGE, require(config, 'view', 'rviz_config'))
+    robot_description = {'robot_description': ParameterValue(Command([
+        FindExecutable(name='xacro'), ' ', description_file,
+        ' onrobot_type:=', LaunchConfiguration('onrobot_type'),
+        ' prefix:=', LaunchConfiguration('prefix'),
+    ]), value_type=str)}
 
-    description_package = LaunchConfiguration("description_package")
-    onrobot_type = LaunchConfiguration("onrobot_type")
-    prefix = LaunchConfiguration("prefix")
-    ns = LaunchConfiguration("ns")
-    gui = LaunchConfiguration("gui")
-
-    robot_description_content = Command(
-        [
-            PathJoinSubstitution([FindExecutable(name="xacro")]),
-            " ",
-            PathJoinSubstitution(
-                [FindPackageShare(description_package), "urdf", description_file]
-            ),
-            " ",
-            "onrobot_type:=",
-            onrobot_type,
-            " ",
-            "prefix:=",
-            prefix,
-            " ",
-            "use_mock_hardware:=true",
-            " ",
-        ]
-    )
-    robot_description = {
-        "robot_description": ParameterValue(robot_description_content, value_type=str)
-    }
-
-    rviz_config_file = PathJoinSubstitution(
-        [FindPackageShare(description_package), "rviz", "view_onrobot.rviz"]
-    )
-
-    joint_state_publisher_gui_node = Node(
-        namespace=ns,
-        package="joint_state_publisher_gui",
-        executable="joint_state_publisher_gui",
-        name="joint_state_publisher_gui",
-        output="screen",
-        condition=IfCondition(gui),
-    )
-    joint_state_publisher_node = Node(
-        namespace=ns,
-        package="joint_state_publisher",
-        executable="joint_state_publisher",
-        name="joint_state_publisher",
-        output="screen",
-        condition=UnlessCondition(gui),
-    )
-    robot_state_publisher_node = Node(
-        namespace=ns,
-        package="robot_state_publisher",
-        executable="robot_state_publisher",
-        output="both",
-        parameters=[robot_description],
-    )
-    rviz_node = Node(
-        namespace=ns,
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
-        output="log",
-        arguments=["-d", rviz_config_file],
-    )
+    def node(package, executable, **options):
+        return Node(namespace=namespace, package=package, executable=executable, **options)
 
     return [
-        joint_state_publisher_gui_node,
-        joint_state_publisher_node,
-        robot_state_publisher_node,
-        rviz_node,
+        node('joint_state_publisher_gui', 'joint_state_publisher_gui',
+             name='joint_state_publisher_gui', output='screen', condition=IfCondition(gui)),
+        node('joint_state_publisher', 'joint_state_publisher',
+             name='joint_state_publisher', output='screen', condition=UnlessCondition(gui)),
+        node('robot_state_publisher', 'robot_state_publisher',
+             output='both', parameters=[robot_description]),
+        node('rviz2', 'rviz2', name='rviz2', output='log', arguments=['-d', rviz_config]),
     ]
 
 
 def generate_launch_description():
-    declared_arguments = []
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "onrobot_type",
-            default_value="2fg7",
-            description="OnRobot type to load.",
-            choices=["2fg7", "3fg15", "vgc10"],
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "description_package",
-            default_value="onrobot_description",
-            description="Package with the OnRobot URDF/XACRO files.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "prefix",
-            default_value='""',
-            description="Prefix for joint names (useful for multi-robot setups).",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "ns",
-            default_value="onrobot",
-            description="Namespace for the nodes.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "gui",
-            default_value="true",
-            description="Start joint_state_publisher_gui (true) or joint_state_publisher (false).",
-            choices=["true", "false"],
-        )
-    )
-
-    return LaunchDescription(declared_arguments + [OpaqueFunction(function=launch_setup)])
+    config = load_config(package_file(PACKAGE, 'config', 'onrobot_description.yaml'))
+    arguments = declare_arguments(
+        config, 'view_launch_arguments', choices={'onrobot_type': gripper_names()})
+    return LaunchDescription(arguments + [OpaqueFunction(function=launch_setup)])
